@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * @file
+ * This module holds an exercise for learning Drupal module development as
+ * taught during the Wayne Eaker's DrupalTutor course. Please contribute!
+ */
+
+/**
+ * Implements hook_block_info().
+ */
+function hello_block_info() {
+  kpr($module);
+  kpr($delta);
+  kpr($info);
+
+}
+
+/**
+ * Implements hook_block_view().
+ */
+
+function hello_block_view($delta = '') {
+  
+}
