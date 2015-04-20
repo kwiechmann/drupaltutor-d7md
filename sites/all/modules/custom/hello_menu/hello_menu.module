@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ * Remember to clear cache when adding hook_menu parameters.
+ */
+function hello_menu_menu () {
+  $items = array();
+  
+  // title automatically goes through t().
+  $items['hello'] = array(
+    'title' => 'Hello World',
+    'page callback' => 'hello_menu_simple_hello',
+     'access arguments' => array('access content'),
+  );
+  
+  return $items;
+}
+
+function hello_menu_simple_hello() {
+  return t('Hello world!!!');
+}
