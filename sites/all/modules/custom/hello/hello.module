@@ -13,11 +13,15 @@ function hello_block_info() {
   $blocks = array();
   
   $blocks['hello_world'] = array(
-    'info' => t('Hello World Block'),
+    'info' => t('Hello world block'),
   );
   
   $blocks['hello_user'] = array(
     'info' => t('Hellow User Block'),
+  );
+  
+  $blocks['user_info'] = array(
+    'info' => t('User info block'),
   );
     
   return $blocks;
@@ -27,7 +31,6 @@ function hello_block_info() {
  * Implements hook_block_view().
  */
 function hello_block_view($delta = '') {
-  kpr($delta);
   $block = array();
   
   switch ($delta) {
@@ -52,12 +55,32 @@ function hello_block_view($delta = '') {
         $greeting = 'Hello @user_name!!';
       }
       
-      $block['subject'] = t('Hello World!!!');
+      $block['subject'] = t('Hello User!!!');
       // Both of the following are functionally equivalent, but the second one
       // may be more preferred due to maintainability.
       // global $user;
       // $block['content'] = t($greeting, array('@user_name' => $user->name));
       $block['content'] = t($greeting, array('@user_name' => $GLOBALS['user']->name));
+      break;
+      
+    case 'user_info':
+      if (arg(0) == 'user' && is_numeric(arg(1))) {
+        $account = user_load(arg(1));
+        
+        if (!empty($account)) {
+          $block['subject'] = t('User Info');
+          
+          $content = '';
+          $content .= '<div><label>' . t('Name') . '</label>' . $account->name . '</div>';
+          $content .= '<div><label>' . t('Mail') . '</label>' . $account->mail . '</div>';
+          $content .= '<div><label>' . t('Created') . '</label>' . format_date($account->created) . '</div>';
+          $content .= '<div><label>' . t('Last Access') . '</label>';
+          $content .= $account->access == 0 ? t('never') : format_date($account->access);
+          $content .= '</div>';
+          
+          $block['content'] = $content;
+        }
+      }
       break;
     
     default: 
