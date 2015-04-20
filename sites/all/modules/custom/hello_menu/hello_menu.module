@@ -11,7 +11,18 @@ function hello_menu_menu () {
   $items['hello'] = array(
     'title' => 'Hello World',
     'page callback' => 'hello_menu_simple_hello',
-     'access arguments' => array('access content'),
+    
+    // Pull from the permissions page. Replace dashes with spaces and loose the
+    // initial "edit-" "edit-access-content" => "access content"
+    'access arguments' => array('access content'),
+    
+    // Menu name can be retrieved from the URL of the Admin > Structure > Menu.
+    // 'menu_name' is strangely but correctly underscored.
+    'menu_name' => 'main-menu',
+    
+    // Default menu weight is 0. Moving through the interface, will start with
+    // a weight of -50.
+    'weight' => 1,
   );
   
   return $items;
