@@ -1,0 +1,6 @@
+name = Hello
+description = First module for DrupalTutor Module Development course.
+core = 7.x
+version = 7.x-1.x
+package = DrupalTutor
+
