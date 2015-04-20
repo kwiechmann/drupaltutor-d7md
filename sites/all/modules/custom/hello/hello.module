@@ -27,6 +27,7 @@ function hello_block_info() {
  * Implements hook_block_view().
  */
 function hello_block_view($delta = '') {
+  kpr($delta);
   $block = array();
   
   switch ($delta) {
@@ -36,25 +37,27 @@ function hello_block_view($delta = '') {
       break;
     
     case 'hello_user':
-      global $user;
-      $hour = date('G');
+      $current_hour = date('G');
       $greeting = '';
-      if ($hour < 12) {
+      if ($current_hour < 12) {
         $greeting = 'Good morning @user_name!';
       }
-      elseif ($hour > 18) {
+      elseif ($current_hour < 18) {
+        $greeting = 'Good evening @user_name!';
+      }
+      elseif ($current_hour >= 18) {
         $greeting = 'Good evening @user_name!';
       }
       else {
         $greeting = 'Hello @user_name!!';
       }
       
-      $block['subject'] = t('Hello World');
+      $block['subject'] = t('Hello World!!!');
       // Both of the following are functionally equivalent, but the second one
       // may be more preferred due to maintainability.
       // global $user;
       // $block['content'] = t($greeting, array('@user_name' => $user->name));
-      // $block['content'] = t($greeting, array('@user_name' => $GLOBALS['user']->name));
+      $block['content'] = t($greeting, array('@user_name' => $GLOBALS['user']->name));
       break;
     
     default: 
