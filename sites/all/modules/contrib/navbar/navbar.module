@@ -1071,7 +1071,7 @@ function _navbar_libraries_filter_null_values($item) {
  * Libraries API variant callback.
  */
 function _navbar_libraries_variant_exists($library, $variant_name, $required_file) {
-  return file_exists($library['library path'] . '/' . $required_file);;
+  return file_exists($library['library path'] . '/' . $required_file);
 }
 
 /**
@@ -1120,7 +1120,7 @@ function _navbar_convert_libraries_to_library($library, $options = array()) {
   if ($name = _navbar_libraries_get_preferred_variant_name($library)) {
     $files = $library['variants'][$name]['files'];
   }
-
+  
   // Define the library if files exist for it.
   if (!empty($files)) {
     // This is the basic structure expected by hook_library().
