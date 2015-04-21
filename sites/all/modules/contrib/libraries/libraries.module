@@ -43,7 +43,7 @@ function libraries_get_path($name, $base_path = FALSE) {
 
   if (!isset($libraries)) {
     $libraries = libraries_get_libraries();
-  }
+  };
 
   $path = ($base_path ? base_path() : '');
   if (!isset($libraries[$name])) {
