@@ -1,0 +1,175 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ * Remember to clear cache when adding hook_menu parameters.
+ */
+function hello_menu_menu () {
+  $items = array();
+  
+  // title automatically goes through t().
+  $items['hello'] = array(
+    'title' => 'Hello World',
+    'page callback' => 'hello_menu_simple_hello',
+    
+    // Hover text works on "Menu Items" which in Bartek which the CSS makes look
+    // like tabs.  Just Bartek?
+    'description' => 'Hello hover text',
+    
+    // Pull from the permissions page. Replace dashes with spaces and loose the
+    // initial "edit-" "edit-access-content" => "access content"
+    'access arguments' => array('access content'),
+    
+    // Menu name can be retrieved from the URL of the Admin > Structure > Menu.
+    // 'menu_name' is strangely but correctly underscored.
+    'menu_name' => 'main-menu',
+    
+    // Default menu weight is 0. Moving through the interface, will start with
+    // a weight of -50.
+    'weight' => 1,
+    
+    // If 'type' is not defined, the default is MENU_NORMAL_ITEM.
+    'type' => MENU_NORMAL_ITEM,
+  );
+  
+  //
+  $items['hello/invisible'] = array(
+    'title' => 'Invisible',
+    'page callback' => 'hello_menu_invisible',
+    'access arguments' => array('access content'),
+    
+    // MENU_CALLBACK types will have not any visible UI within the menus.
+    'type' => MENU_CALLBACK,
+  );
+
+  // Because this is setup as MENU_DEFAULT_LOCAL_TASK, this will inherit the
+  // parent settings.
+  $items['hello/simple'] = array(
+    'title' => 'Simple',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+    
+    // Hover text does not work on local tasks. Just Bartek?
+    'description' => 'Simple hover text',
+  );
+  
+  // Bartik does not support the nesting of menus in main-menu.
+  // Once added to a menu, can no longer rely on the default menu items.
+  // Navigation menu does not have "-menu" as part of the menu id.
+  $items['hello/variables'] = array(
+    'title' => 'Hello Variables',
+    'page callback' => 'hello_menu_list_variables',
+    'access arguments' => array('access content'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+  );
+  
+  $items['hello/variables/list'] = array(
+    'title' => 'List',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+  );
+ 
+   $items['hello/variables/create'] = array(
+    'title' => 'Create Variable local task',
+    'page callback' => 'hello_menu_create_variable',
+    'access arguments' => array('access content'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+ 
+     // Hover text does not work on local tasks. Just Bartek?
+    'description' => 'Variable Create local task hover text',
+  );
+  
+   $items['hello/variables/delete'] = array(
+    'title' => 'Delete Variable local task',
+    'page callback' => 'hello_menu_delete_variable',
+    'access arguments' => array('access content'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 3,
+  );
+  
+  $items['hello/variables/create-action'] = array(
+    'title' => 'Create Variable local action',
+    'page callback' => 'hello_menu_create_variable',
+    'access arguments' => array('access content'),
+    'type' => MENU_LOCAL_ACTION,
+    'weight' => 1,
+    
+    // Hover text does not work on local tasks. Just Bartek?
+    'description' => 'Create Variable local action hover text',
+  );
+  
+  $items['hello/variables/delete-action'] = array(
+    'title' => 'Delete Variable local action',
+    'page callback' => 'hello_menu_delete_variable',
+    'access arguments' => array('access content'),
+    'type' => MENU_LOCAL_ACTION,
+    'weight' => 2,
+  );
+  
+    $items['hello/variables/%'] = array(
+    'title callback' => 'hello_menu_show_variable_title',
+    'title arguments' => array(2),
+    'page callback' => 'hello_menu_show_variable',
+    'page arguments' => array(2),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  
+  return $items;
+}
+
+function hello_menu_invisible() {
+  return t('Reserved for invisible page.');
+}
+
+function hello_menu_delete_variable() {
+  return t('Reserved for deleting variables.');
+}
+
+function hello_menu_create_variable() {
+  return t('Reserved for creating variables.');
+}
+
+function hello_menu_show_variable_title($variable_name) {
+  return t('Show Variable: @variable_name', array('@variable_name' => $variable_name));
+}
+
+function hello_menu_show_variable($variable_name) {
+  $output = '';
+  
+  $output .= '<label>key</label>' . $variable_name;
+  $output .= '<label>value</label>' . variable_get($variable_name, t('No value for this variable.'));
+  
+  return $output;
+}
+
+function hello_menu_list_variables() {
+  $variables = variable_initialize();
+  $names = array_keys($variables);
+  $output = '';
+  
+  // Must include TRUE so as not to print immediately, i.e., buffered up.
+  // $output .= kpr($variables, TRUE);
+  // $output .= kpr($names, TRUE);
+  
+  $options = array( 
+    'attributes' => array(
+      'target' => '_blank',
+      'class' => array('test-link', 'variable-link'),
+    ),
+  );
+  $output .= '<ul>';
+  foreach ($names as $name) {
+    $output .= '<li>' . l($name, 'hello/variables/' . $name, $options) . '</li>';
+  }
+  $output .= '</ul>';
+  
+  return $output;
+}
+
+function hello_menu_simple_hello() {
+  // Must return a string to avoid a blank page.
+  return t('Hello world!!!');
+}
