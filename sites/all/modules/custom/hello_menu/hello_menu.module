@@ -25,9 +25,55 @@ function hello_menu_menu () {
     'weight' => 1,
   );
   
+  // Bartik does not support the nesting of menus in main-menu.
+  // Once added to a menu, can no longer rely on the default menu items.
+  // Navigation menu does not have "-menu" as part of the menu id.
+  $items['variables'] = array(
+    'title' => 'Hello Variables',
+    'page callback' => 'hello_menu_list_variables',
+    'access arguments' => array('access content'),
+    'menu_name' => 'navigation',
+  );
+  
+  $items['variables/site_name'] = array(
+    'title' => 'Hello Variables: site_name',
+    'page callback' => 'hello_menu_show_variable',
+    'access arguments' => array('access content'),
+    'menu_name' => 'navigation',
+  );
+  
   return $items;
 }
 
+function hello_menu_show_variable() {
+  $output = '';
+  
+  $name = 'site_name';
+  $output .= '<label>key</label>' . $name;
+  $output .= '<label>value</label>' . variable_get($name, t('No value for this variable.'));
+  
+  return $output;
+}
+
+function hello_menu_list_variables() {
+  $variables = variable_initialize();
+  $names = array_keys($variables);
+  $output = '';
+  
+  // Must include TRUE so as not to print immediately, i.e., buffered up.
+  // $output .= kpr($variables, TRUE);
+  // $output .= kpr($names, TRUE);
+  
+  $output .= '<ul>';
+  foreach ($names as $name) {
+    $output .= '<li><label><a href="variables/' . $name . '">' . $name . '</a></label></li>';
+  }
+  $output .= '</ul>';
+  
+  return $output;
+}
+
 function hello_menu_simple_hello() {
+  // Must return a string to avoid a blank page.
   return t('Hello world!!!');
 }
