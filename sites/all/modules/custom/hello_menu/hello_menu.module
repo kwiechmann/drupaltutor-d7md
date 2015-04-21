@@ -12,6 +12,10 @@ function hello_menu_menu () {
     'title' => 'Hello World',
     'page callback' => 'hello_menu_simple_hello',
     
+    // Hover text works on "Menu Items" which in Bartek which the CSS makes look
+    // like tabs.  Just Bartek?
+    'description' => 'Hello hover text',
+    
     // Pull from the permissions page. Replace dashes with spaces and loose the
     // initial "edit-" "edit-access-content" => "access content"
     'access arguments' => array('access content'),
@@ -23,14 +27,30 @@ function hello_menu_menu () {
     // Default menu weight is 0. Moving through the interface, will start with
     // a weight of -50.
     'weight' => 1,
+    
+    // If 'type' is not defined, the default is MENU_NORMAL_ITEM.
+    'type' => MENU_NORMAL_ITEM,
   );
   
+  //
+  $items['hello/invisible'] = array(
+    'title' => 'Invisible',
+    'page callback' => 'hello_menu_invisible',
+    'access arguments' => array('access content'),
+    
+    // MENU_CALLBACK types will have not any visible UI within the menus.
+    'type' => MENU_CALLBACK,
+  );
+
   // Because this is setup as MENU_DEFAULT_LOCAL_TASK, this will inherit the
   // parent settings.
   $items['hello/simple'] = array(
     'title' => 'Simple',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 1,
+    
+    // Hover text does not work on local tasks. Just Bartek?
+    'description' => 'Simple hover text',
   );
   
   // Bartik does not support the nesting of menus in main-menu.
@@ -44,23 +64,68 @@ function hello_menu_menu () {
     'weight' => 2,
   );
   
-  $items['hello/variables/create'] = array(
-    'title' => 'Create Variable',
+  $items['hello/variables/list'] = array(
+    'title' => 'List',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+  );
+ 
+   $items['hello/variables/create'] = array(
+    'title' => 'Create Variable local task',
+    'page callback' => 'hello_menu_create_variable',
+    'access arguments' => array('access content'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+ 
+     // Hover text does not work on local tasks. Just Bartek?
+    'description' => 'Variable Create local task hover text',
+  );
+  
+   $items['hello/variables/delete'] = array(
+    'title' => 'Delete Variable local task',
+    'page callback' => 'hello_menu_delete_variable',
+    'access arguments' => array('access content'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 3,
+  );
+  
+  $items['hello/variables/create-action'] = array(
+    'title' => 'Create Variable local action',
     'page callback' => 'hello_menu_create_variable',
     'access arguments' => array('access content'),
     'type' => MENU_LOCAL_ACTION,
+    'weight' => 1,
+    
+    // Hover text does not work on local tasks. Just Bartek?
+    'description' => 'Create Variable local action hover text',
   );
   
-  $items['hello/variables/%'] = array(
+  $items['hello/variables/delete-action'] = array(
+    'title' => 'Delete Variable local action',
+    'page callback' => 'hello_menu_delete_variable',
+    'access arguments' => array('access content'),
+    'type' => MENU_LOCAL_ACTION,
+    'weight' => 2,
+  );
+  
+    $items['hello/variables/%'] = array(
     'title callback' => 'hello_menu_show_variable_title',
     'title arguments' => array(2),
     'page callback' => 'hello_menu_show_variable',
     'page arguments' => array(2),
     'access arguments' => array('access content'),
-    'menu_name' => 'navigation',
+    'type' => MENU_CALLBACK,
   );
   
   return $items;
+}
+
+function hello_menu_invisible() {
+  return t('Reserved for invisible page.');
+}
+
+function hello_menu_delete_variable() {
+  return t('Reserved for deleting variables.');
 }
 
 function hello_menu_create_variable() {
