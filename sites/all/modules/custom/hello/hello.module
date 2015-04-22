@@ -6,10 +6,6 @@
  * taught during the Wayne Eaker's DrupalTutor course. Please contribute!
  */
 
-function hello_menu() {
-  print_r('foo');
-  drupal_add_js('../../libraries/underscore/underscore-min.js');
-}
 /**
  * Implements hook_block_info().
  */
