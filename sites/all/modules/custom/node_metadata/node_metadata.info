@@ -1,0 +1,23 @@
+; Required
+name = Node Metadata
+core  = 7.x
+
+; Recommended
+description = Module that shows metadata about a node.
+
+; Optional
+; stylesheets[]
+; scripts[]
+; files[]
+; dependencies[]
+; php
+; configure
+; required
+; hidden (7.x and newer)
+; project status url (only used on custom modules not submitted to drupal.org)
+
+; Discouraged
+; Include version when not hosted on non-Drupal.org infrastructure.
+version = 7.x-1.x
+; If not specified package defaults to "Other".
+package = DrupalTutor

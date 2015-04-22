@@ -1,0 +1,41 @@
+<?php
+
+function node_metadata_menu() {
+  $items = array();
+  
+  // Using a named wildcard of "%node" instead of just "%". Saves a call to
+  // node_load. As configured, Drupal looks for a "????_load" function
+  // $items['node/%/metadata'] = array() => $nid
+  // $items['node/%node/metadata'] = array() => node_load($nid)
+  // $items['node/%node_metadata/metadata'] = array() => node_metadata_load($nid)
+  $items['node/%node_metadata/metadata'] = array(
+    'title' => 'Metadata',
+    'page callback' => 'node_metadata_page',
+    'page arguments' => array(1),
+    'access arguments' => array('view node metadata'),
+
+    // Possible to use 'file' => 'includes/node_metadata.pages.inc' and skip
+    // 'file path' but this is not a Drupal best practice.
+    'file path' => drupal_get_path('module', 'node_metadata') . '/includes',
+    'file' => 'node_metadata.pages.inc',
+    
+    'type' => MENU_LOCAL_TASK,
+  );
+  
+  return $items;
+}
+
+function node_metadata_permission() {
+  return array(
+    'view node metadata' => array (
+      'title' => t('View metadata of nodes'),
+      'description' => t('See important information about nodes.'),
+    ),
+  );
+}
+
+function node_metadata_load($nid) {
+  // Not very useful for this example but could alter the result.
+  return node_load($nid);
+}
+
