@@ -13,6 +13,9 @@ function node_metadata_menu() {
     'page callback' => 'node_metadata_page',
     'page arguments' => array(1),
     'access arguments' => array('view node metadata'),
+    
+    // Default access for this page is 'user_access'.
+    'access callback' => 'user_access',
 
     // Possible to use 'file' => 'includes/node_metadata.pages.inc' and skip
     // 'file path' but this is not a Drupal best practice.

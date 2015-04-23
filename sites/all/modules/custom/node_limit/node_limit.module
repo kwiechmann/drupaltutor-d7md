@@ -1,0 +1,65 @@
+<?php
+
+define('NODE_LIMIT_MAX_SECONDS', 100 * 60);
+
+function node_limit_menu() {
+  $items = array();
+  
+  $items['node/%node/edit-locked'] = array(
+    'title' => 'Update (locked)',
+    'page callback' => 'node_limit_locked_page',
+    'access callback' => 'node_limit_node_edit_locked_access',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => -1,
+  );
+  
+  return $items;
+}
+
+function node_limit_locked_page() {
+  return t('This content is locked. For assistance, please contact your system adminstrator.');
+}
+
+function node_limit_menu_alter(&$items) {
+  // Change the local task tab to be named 'Update' instead of 'Edit'.
+  // $items['node/%node/edit']['title'] = 'Update';
+  $items['node/%node/edit']['title callback'] = 'node_limit_node_edit_title';
+  $items['node/%node/edit']['title arguments'] = array(1);
+  
+  // Restore the positioning to match pre title altering of alphabetical.
+  $items['node/%node/edit']['weight'] = -1;
+  
+  // Default values.
+  // $items['node/%node/edit']['access callback'] = 'node_access';
+  // $items['node/%node/edit']['access arguments'] = array('update', 1);
+  $items['node/%node/edit']['access callback'] = 'node_limit_node_edit_access';
+  $items['node/%node/edit']['access arguments'] = array(1);
+}
+
+function node_limit_node_edit_title($node) {
+  $time_diff = REQUEST_TIME - $node->changed;
+  $time_left = NODE_LIMIT_MAX_SECONDS - $time_diff;
+  
+  return t('Update (Time remaining: @time_left)', array('@time_left' => format_interval($time_left)));
+}
+
+// Be careful not to name any node access as "<module_name>_node_access". This
+// will cause an endless loop to occur for non-super admins. 
+// ** The access hooks are not call for the super admin which may cause problems
+// to remain hidden.
+function node_limit_node_edit_access($node) {
+  if ($node->changed > (REQUEST_TIME - NODE_LIMIT_MAX_SECONDS)) {
+    return node_access('update', $node);
+  }
+  return FALSE;
+}
+
+function node_limit_node_edit_locked_access($node) {
+  if ($node->changed > (REQUEST_TIME - NODE_LIMIT_MAX_SECONDS)) {
+    return FALSE;
+  }
+  
+  return node_access('update', $node);
+}
+
