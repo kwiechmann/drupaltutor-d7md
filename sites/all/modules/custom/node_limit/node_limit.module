@@ -1,6 +1,6 @@
 <?php
 
-define('NODE_LIMIT_MAX_SECONDS', 100 * 60);
+define('NODE_LIMIT_MAX_SECONDS', 15 * 60);
 
 function node_limit_menu() {
   $items = array();
@@ -12,13 +12,19 @@ function node_limit_menu() {
     'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK,
     'weight' => -1,
-  );
+    'file path' => drupal_get_path('module', 'node_limit') . '/includes',
+    'file' => 'node_limit.pages.inc',  );
   
   return $items;
 }
 
-function node_limit_locked_page() {
-  return t('This content is locked. For assistance, please contact your system adminstrator.');
+function node_limit_permission() {
+  return array(
+    'edit node limit by-pass' => array (
+      'title' => t('By-pass maximum node edit limit'),
+      'description' => t('See important information about nodes.'),
+    ),
+  );
 }
 
 function node_limit_menu_alter(&$items) {
@@ -38,6 +44,11 @@ function node_limit_menu_alter(&$items) {
 }
 
 function node_limit_node_edit_title($node) {
+  // let ussers with time limit by-pass set know that they are special.
+  if (user_access('edit node limit by-pass')) {
+    return t('Update (No time limits)');
+  }
+
   $time_diff = REQUEST_TIME - $node->changed;
   $time_left = NODE_LIMIT_MAX_SECONDS - $time_diff;
   
@@ -49,13 +60,26 @@ function node_limit_node_edit_title($node) {
 // ** The access hooks are not call for the super admin which may cause problems
 // to remain hidden.
 function node_limit_node_edit_access($node) {
+  // Allow users with time limit by-pass set access if their node_access allows
+  // them access to update
+  if (user_access('edit node limit by-pass')) {
+    return node_access('update', $node);
+  }
+  
   if ($node->changed > (REQUEST_TIME - NODE_LIMIT_MAX_SECONDS)) {
     return node_access('update', $node);
   }
+  
   return FALSE;
 }
 
 function node_limit_node_edit_locked_access($node) {
+  // No need to display the locked tab when the node limit by-pass permission
+  // is set.
+  if (user_access('edit node limit by-pass')) {
+    return FALSE;
+  }
+ 
   if ($node->changed > (REQUEST_TIME - NODE_LIMIT_MAX_SECONDS)) {
     return FALSE;
   }

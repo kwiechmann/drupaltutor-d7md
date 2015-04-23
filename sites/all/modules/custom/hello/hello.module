@@ -44,16 +44,16 @@ function hello_block_view($delta = '') {
 
       $greeting = '';
       if ($current_hour < 12) {
-        $greeting = 'Good morning @user_name!';
+        $greeting = 'Good morning@user_name!';
       }
       elseif ($current_hour < 18) {
-        $greeting = 'Good afternoon @user_name!';
+        $greeting = 'Good afternoon@user_name!';
       }
       elseif ($current_hour >= 18) {
-        $greeting = 'Good evening @user_name!';
+        $greeting = 'Good evening@user_name!';
       }
       else {
-        $greeting = 'Hello @user_name!!';
+        $greeting = 'Hello@user_name!!';
       }
       
       $block['subject'] = t('Hello User!!!');
@@ -61,7 +61,11 @@ function hello_block_view($delta = '') {
       // may be more preferred due to maintainability.
       // global $user;
       // $block['content'] = t($greeting, array('@user_name' => $user->name));
-      $block['content'] = t($greeting, array('@user_name' => $GLOBALS['user']->name));
+      $user_name = '';
+      if (!empty($GLOBALS['user']->name)) {
+        $user_name = ' ' . $GLOBALS['user']->name;
+      }
+      $block['content'] = t($greeting, array('@user_name' => $user_name));
       break;
       
     case 'user_info':
