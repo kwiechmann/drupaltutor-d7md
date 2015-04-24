@@ -1,0 +1,84 @@
+<?php
+
+define('HAMSTER_ITEMS_PER_PAGE', 5);
+
+function hamster_menu() {
+  $items = array();
+  
+  $items['hamster'] = array(
+    'title' => 'Hamsters',
+    'page callback' => 'hamster_list',
+    'access arguments' => array('view hamster'),
+  );
+  
+  return $items;
+}
+
+function hamster_list() {
+  $output = '';
+  
+  // For DB optimization, avoid * and use a specific DB field.
+  $total = db_query("SELECT COUNT(id) FROM {hamster}")->fetchField();
+  
+  $page = pager_default_initialize($total, HAMSTER_ITEMS_PER_PAGE);
+  
+  $results = db_query_range("SELECT
+                               h.*,
+                               hh.name AS habitat_name
+                             FROM {hamster} AS h
+                             LEFT JOIN {hamster_habitat} AS hh
+                             ON
+                               h.habitat_id = hh.id
+                             ORDER BY h.id ASC",
+                            $page * HAMSTER_ITEMS_PER_PAGE,
+                            HAMSTER_ITEMS_PER_PAGE);
+  
+  $rows = array();
+  foreach ($results as $record) {
+    $image_variables = array(
+      'path' => file_build_uri($record->image),
+      'style_name' => 'thumbnail',
+    );
+    
+    $row = array(
+      $record->id,
+      $record->name,
+      $record->gender,
+      t('@weight g', array('@weight' => $record->weight)),
+      format_date($record->birthdate, 'custom', 'Y-m-d'),
+      theme('image_style', $image_variables),
+      $record->habitat_name,
+    );
+    
+    $rows[] = $row;
+  };
+  
+  $header = array(
+    t('ID'),
+    t('Name'),
+    t('Gender'),
+    t('Weight'),
+    t('Birth Date'),
+    t('Image'),
+    t('Habitat'),
+  );
+  
+  $variables = array(
+    'rows' => $rows,
+    'header' => $header,
+  );
+  
+  $output .= theme('table', $variables);
+  $output .= theme('pager');
+  
+  return $output;
+}
+
+function hamster_permission() {
+  return array(
+    'view hamster' => array(
+      'title' => t('View Hamster'),
+      'description' => t('View information about hamsters in the database.'),
+    ),
+  );  
+}
