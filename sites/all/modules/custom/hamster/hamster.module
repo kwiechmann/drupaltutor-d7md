@@ -1,0 +1,215 @@
+<?php
+
+define('HAMSTER_ITEMS_PER_PAGE', 5);
+
+function hamster_menu() {
+  $items = array();
+  
+  $items['hamster'] = array(
+    'title' => 'Hamsters',
+    'page callback' => 'hamster_list',
+    'access arguments' => array('view hamster'),
+  );
+  
+  $items['hamster/%hamster'] = array(
+    'title callback' => 'hamster_page_title',
+    'title arguments' => array(1),
+    'page callback' => 'hamster_page',
+    'page arguments' => array(1),
+    'access arguments' => array('view hamster'),
+  );
+  
+  $items['hamster/insert'] = array(
+    'title' => 'DB Insert',
+    'page callback' => 'hamster_insert',
+    'access arguments' => array('edit hamsters'),
+  );
+  
+  $items['hamster/update'] = array(
+    'title' => 'DB Update',
+    'page callback' => 'hamster_update',
+    'access arguments' => array('edit hamsters'),
+  );
+  
+  $items['hamster/delete'] = array(
+    'title' => 'DB Delete',
+    'page callback' => 'hamster_delete',
+    'access arguments' => array('edit hamsters'),
+  );
+  
+  return $items;
+}
+
+function hamster_insert() {
+  db_query("INSERT INTO {hamster} (name, gender, weight, birthdate, image, habitat_id)
+            VALUES (:name, :gender, :weight, :birthdate, :image, :habitat_id)",
+    array(
+      ':name' => 'Test',
+      ':gender' => 'male',
+      ':weight' => 150,
+      ':birthdate' => REQUEST_TIME,
+      ':image' => '',
+      ':habitat_id' => 3,
+    )
+   );
+  
+  return t('Insertion complete.');
+}
+
+function hamster_update() {
+  db_query("UPDATE {hamster} 
+              SET 
+                name = 'Updated Test', 
+                habitat_id = :habitat_id
+            WHERE name = :name",
+    array(
+      ':name' => 'Test',
+      ':habitat_id' => 1,
+    )
+   );
+  
+  return t('Updating complete.');
+}
+
+function hamster_delete() {
+  db_query("DELETE FROM {hamster} 
+            WHERE name = :name",
+    array(
+      ':name' => 'Updated Test',
+    )
+   );
+  
+  return t('Deleting complete.');
+}
+
+function hamster_load($id) {
+  $result = db_query("SELECT
+                        h.*,
+                        hh.name AS habitat_name
+                      FROM {hamster} AS h
+                      LEFT JOIN {hamster_habitat} AS hh
+                      ON
+                        h.habitat_id = hh.id
+                      WHERE h.id = :hamster_id",
+                      array(':hamster_id' => $id)
+                    )->fetchObject();
+    
+  return $result;
+}
+
+function hamster_theme($existing, $type, $theme, $path) {
+  return array(
+    'hamster_info' => array(
+      'variables' => array('hamster' => NULL),
+    ),
+  );
+}
+
+function theme_hamster_info($variables) {
+  $hamster = $variables['hamster'];
+
+  drupal_add_css(drupal_get_path('module', 'hamster') . '/css/hamster.css');
+  
+  $output = '';
+  
+  $output .= '<div class="hamster-page">';
+  
+  if (!empty($hamster->image)) {
+    $output .= '<div>' . theme('image', array('path' => file_build_uri($hamster->image), 'style' => 'large')) . '</div>';
+  }
+  $output .= '<div><label class="inline">' . t('ID') . ':</label>' . $hamster->id . '</div>';
+  $output .= '<div><label class="inline">' . t('Gender') . ':</label>' . $hamster->gender . '</div>';
+  $output .= '<div><label class="inline">' . t('Weight') . ':</label>' . t('@weight g', array('@weight' => $hamster->weight)) . '</div>';
+  $output .= '<div><label class="inline">' . t('Birth Date') . ':</label>' . format_date($hamster->birthdate, 'custom', 'Y-m-d') . '</div>';
+  $age = REQUEST_TIME - $hamster->birthdate;
+  $output .= '<div><label class="inline">' . t('Age') . ':</label>' . format_interval($age, 2) . '</div>';
+  $output .= '<div><label class="inline">' . t('Habitat') . ':</label>' . $hamster->habitat_name . '</div>';
+  
+  $output .= '</div>';
+  
+  return $output;
+ }
+
+function hamster_page($hamster) {
+  // By calling the theme function, themers can alter the appearance of the
+  // hamster output from what is defined in theme_hamster_info to suit the 
+  // required taste.
+  return theme('hamster_info', array('hamster' => $hamster));
+}
+
+function hamster_page_title($hamster) {
+  return $hamster->name;
+}
+
+function hamster_list() {
+  $output = '';
+  
+  // For DB optimization, avoid * and use a specific DB field.
+  $total = db_query("SELECT COUNT(id) FROM {hamster}")->fetchField();
+  
+  $page = pager_default_initialize($total, HAMSTER_ITEMS_PER_PAGE);
+  
+  $results = db_query_range("SELECT
+                               h.*,
+                               hh.name AS habitat_name
+                             FROM {hamster} AS h
+                             LEFT JOIN {hamster_habitat} AS hh
+                             ON
+                               h.habitat_id = hh.id
+                             ORDER BY h.id ASC",
+                            $page * HAMSTER_ITEMS_PER_PAGE,
+                            HAMSTER_ITEMS_PER_PAGE);
+  
+  $rows = array();
+  foreach ($results as $record) {
+    $image_variables = array(
+      'path' => file_build_uri($record->image),
+      'style_name' => 'thumbnail',
+    );
+    
+    $row = array(
+      $record->id,
+      $record->name,
+      $record->gender,
+      t('@weight g', array('@weight' => $record->weight)),
+      format_date($record->birthdate, 'custom', 'Y-m-d'),
+      theme('image_style', $image_variables),
+      $record->habitat_name,
+    );
+    
+    $rows[] = $row;
+  };
+  
+  $header = array(
+    t('ID'),
+    t('Name'),
+    t('Gender'),
+    t('Weight'),
+    t('Birth Date'),
+    t('Image'),
+    t('Habitat'),
+  );
+  
+  $variables = array(
+    'rows' => $rows,
+    'header' => $header,
+  );
+  
+  $output .= theme('table', $variables);
+  $output .= theme('pager');
+  
+  return $output;
+}
+
+function hamster_permission() {
+  return array(
+    'view hamster' => array(
+      'title' => t('View Hamster'),
+      'description' => t('View information about hamsters in the database.'),
+    ),
+    'view hamster' => array(
+      'title' => t('Edit Hamsters'),
+      'description' => t('Edit information about hamsters in the database.'),
+    ),
+  );  
+}
