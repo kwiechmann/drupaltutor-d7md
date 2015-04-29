@@ -37,6 +37,37 @@ function hamster_menu() {
     'access arguments' => array('edit hamsters'),
   );
   
+  $items['hamster-oo'] = array(
+    'title' => 'Hamsters',
+    'page callback' => 'hamster_oo_list',
+    'access arguments' => array('view hamster'),
+  );
+  
+   $items['hamster-oo/%'] = array(
+    'title' => 'Hamsters',
+    'page callback' => 'hamster_oo_list',
+    'access arguments' => array('view hamster'),
+  );
+  
+ 
+  $items['hamster-oo/insert'] = array(
+    'title' => 'DB Insert OO',
+    'page callback' => 'hamster_oo_insert',
+    'access arguments' => array('edit hamsters'),
+  );
+  
+  $items['hamster-oo/update'] = array(
+    'title' => 'DB Update OO',
+    'page callback' => 'hamster_oo_update',
+    'access arguments' => array('edit hamsters'),
+  );
+  
+  $items['hamster-oo/delete'] = array(
+    'title' => 'DB Delete OO',
+    'page callback' => 'hamster_oo_delete',
+    'access arguments' => array('edit hamsters'),
+  );
+
   return $items;
 }
 
@@ -141,6 +172,101 @@ function hamster_page_title($hamster) {
   return $hamster->name;
 }
 
+function hamster_oo_insert() {
+  db_insert('hamster')
+    ->fields(array(
+      'name' => 'Test',
+      'gender' => 'male',
+      'weight' => 150,
+      'birthdate' => REQUEST_TIME,
+      'image' => '',
+      'habitat_id' => 3,
+    ))
+    ->execute();
+  
+  return t('Insertion complete.');
+}
+
+function hamster_oo_update() {
+  db_update('hamster')
+    ->fields(array(
+      'name' => 'Updated Test',
+      'habitat_id' => 1,
+    ))
+    ->condition('name', 'Test', '=')
+    ->execute();
+  
+  return t('Updating complete.');
+}
+
+function hamster_oo_delete() {
+  db_delete('hamster')
+    ->condition('name', 'Updated Test', '=')
+    ->execute();
+  
+  return t('Deleting complete.');
+}
+
+function hamster_oo_list($gender = NULL) {
+  $output = '';
+  
+  $query = db_select('hamster', 'h');
+  $query->join('hamster_habitat', 'hh', 'h.habitat_id = hh.id');
+  $query->fields('h');
+  $query->addField('hh', 'name', 'habitat_name');
+  
+  // When an optional condition exists as part of the query object oriented
+  // SQL queries when be good to consider.
+  if (!empty($gender)) {
+    // Third conditional parameter is equals by default.
+    $query->condition('h.gender', $gender, '=');
+  }
+  // orderBy() defaults to ASC order.
+  $query->orderBy('h.id', 'ASC');
+  $query = $query->extend('PagerDefault')->limit(HAMSTER_ITEMS_PER_PAGE);
+  $results = $query->execute();
+  
+  $rows = array();
+  foreach ($results as $record) {
+    $image_variables = array(
+      'path' => file_build_uri($record->image),
+      'style_name' => 'thumbnail',
+    );
+    
+    $row = array(
+      $record->id,
+      l($record->name, 'hamster/' . $record->id),
+      $record->gender,
+      t('@weight g', array('@weight' => $record->weight)),
+      format_date($record->birthdate, 'custom', 'Y-m-d'),
+      theme('image_style', $image_variables),
+      $record->habitat_name,
+    );
+    
+    $rows[] = $row;
+  };
+  
+  $header = array(
+    t('ID'),
+    t('Name'),
+    t('Gender'),
+    t('Weight'),
+    t('Birth Date'),
+    t('Image'),
+    t('Habitat'),
+  );
+  
+  $variables = array(
+    'rows' => $rows,
+    'header' => $header,
+  );
+  
+  $output .= theme('table', $variables);
+  $output .= theme('pager');
+  
+  return $output;
+}
+
 function hamster_list() {
   $output = '';
   
@@ -169,7 +295,7 @@ function hamster_list() {
     
     $row = array(
       $record->id,
-      $record->name,
+      l($record->name, 'hamster/' . $record->id),
       $record->gender,
       t('@weight g', array('@weight' => $record->weight)),
       format_date($record->birthdate, 'custom', 'Y-m-d'),
