@@ -46,28 +46,22 @@ function hamster_menu() {
    $items['hamster-oo/%'] = array(
     'title' => 'Hamsters',
     'page callback' => 'hamster_oo_list',
+    'page arguments' => array(1),
     'access arguments' => array('view hamster'),
   );
   
- 
-  $items['hamster-oo/insert'] = array(
-    'title' => 'DB Insert OO',
-    'page callback' => 'hamster_oo_insert',
+  $items['hamster-write/insert'] = array(
+    'title' => 'DB Insert Write',
+    'page callback' => 'hamster_write_insert',
     'access arguments' => array('edit hamsters'),
   );
   
-  $items['hamster-oo/update'] = array(
-    'title' => 'DB Update OO',
-    'page callback' => 'hamster_oo_update',
+  $items['hamster-write/update'] = array(
+    'title' => 'DB Update Write',
+    'page callback' => 'hamster_write_update',
     'access arguments' => array('edit hamsters'),
   );
   
-  $items['hamster-oo/delete'] = array(
-    'title' => 'DB Delete OO',
-    'page callback' => 'hamster_oo_delete',
-    'access arguments' => array('edit hamsters'),
-  );
-
   return $items;
 }
 
@@ -325,6 +319,35 @@ function hamster_list() {
   $output .= theme('pager');
   
   return $output;
+}
+
+// drupal_write_record() is usually used when an array or object is written to 
+// the database. Great for the simplicity of output. The second parameter is
+// either an array or image.
+function hamster_write_insert() {
+  $hamster = array(
+    'name' => 'Test',
+    'gender' => 'male',
+    'weight' => 150,
+    'birthdate' => REQUEST_TIME,
+    'image' => '',
+    'habitat_id' => 3,
+  );
+  
+  // Requires that the tables be defined with a hook_schema() implementation.
+  drupal_write_record('hamster', $hamster);
+  
+  return t('Insertion complete.');
+}
+
+function hamster_write_update() {
+  $hamster = array(
+    'name' => 'Updated Test',
+    'habitat_id' => 1,
+  );
+  drupal_write_record('hamster', $hamster, array('name'));
+  
+  return t('Updating complete.');
 }
 
 function hamster_permission() {
