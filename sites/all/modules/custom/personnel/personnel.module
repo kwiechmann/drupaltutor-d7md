@@ -1,0 +1,60 @@
+<?php
+
+function personnel_menu() {
+  $items = array();
+  
+  $items['personnel'] = array(
+    'title' => 'Personnel',
+    'page callback' => 'personnel_list',
+    'access arguments' => array('access content'),
+  );
+  
+  return $items;
+}
+
+function personnel_list() {
+  $output = '';
+  
+  $header = array(
+    t('First Name'),
+    t('Last Name'),
+    t('Department'),
+  );
+ 
+  $rows = array();
+  
+  // Move away from the default DB.
+  db_set_active('phpclass');
+  
+  $results = db_query("SELECT
+                         p.*,
+                         d.name AS department_name
+                       FROM {personnel} AS p
+                       LEFT JOIN {department_members} AS dm
+                       ON p.id = dm.personnel_id
+                       LEFT JOIN {department} AS d
+                       ON dm.department_id = d.id
+                       ORDER BY p.lname, p.fname, d.name");
+  foreach ($results AS $record) {
+    $rows[] = array(
+      $record->fname,
+      $record->lname,
+      $record->department_name,
+    );
+  }
+  
+  // Very important to restore the default DB. Safe to call this multiple 
+  // times without a problem.
+  db_set_active('default');
+  
+  $variables = array(
+    'rows' => $rows,
+    'header' => $header,
+  );
+  
+  $output .= theme('table', $variables);
+  $output .= theme('pager');
+  
+  return $output;
+}
+
