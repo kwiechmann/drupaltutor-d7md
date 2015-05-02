@@ -1,0 +1,73 @@
+<?php
+
+function basicform_menu() {
+  $items = array();
+  
+  $items['basicform'] = array(
+    'title' => 'Basic Form Example',
+    'page callback' => 'basicform_example_page',
+    'access arguments' => array('access content'),
+  );
+  
+  return $items;
+}
+
+function basicform_example_page() {
+  $form = drupal_get_form('basicform_example_form');
+  $output = drupal_render($form);
+  
+  return $output;
+}
+
+function basicform_example_form($form, &$form_state) {
+  $form['name'] = array(
+    '#title' => t('Name'),
+    '#type' => 'textfield',
+    '#required' => TRUE,
+  );
+    
+  $form['email'] = array(
+    '#title' => t('Email'),
+    '#type' => 'textfield',
+    '#required' => TRUE,
+  );
+    
+  $form['phone'] = array(
+    '#title' => t('Phone'),
+    '#type' => 'textfield',
+  );
+    
+  $form['message'] = array(
+    '#title' => t('Message'),
+    '#type' => 'textarea',
+  );
+  
+  // If #title is supplied for a submit item, it will be ignored.
+  $form['send'] = array(
+    '#type' => 'submit',
+    '#value' => t('Send Feedback'),
+  );
+    
+  return $form;
+}
+
+function basicform_example_form_validate($form, &$form_state) {  
+  $phone = $form_state['values']['phone'];
+  $phone_numbers = preg_replace('/[^0-9]/', '', $phone);
+  if (strlen($phone) > 0 && strlen($phone_numbers) < 10) {
+    form_set_error('phone', t('Please enter a complete phone number including area code.'));
+  }
+  
+  $email = $form_state['values']['email'];
+  if (!valid_email_address($email)) {
+    form_set_error('email', t('Please enter a valid email address.'));
+  }
+}
+
+function basicform_example_form_submit($form, &$form_state) {
+  // Options for the second parameter are 'status', 'error', or 'warning'.
+  // Last parameter controls the repeating of messages.
+  drupal_set_message(t('Thank you for submitting the form @name!', array('@name' => $form_state['values']['name'])), 'status', TRUE);
+  //dpm($form_state['values']);
+  
+}
