@@ -1,0 +1,334 @@
+<?php
+
+// https://api.drupal.org/api/drupal/developer!topics!forms_api_reference.html/7
+
+// Newer module: https://www.drupal.org/project/entityform 
+
+function kitchen_sink_menu() {
+  $items = array();
+  
+  $items['kitchen-sink'] = array(
+    'title' => 'Kitchen Sink Form Example',
+    
+    // This is a shortcut since the page is nothing but a form. Contrast against
+    // the basicform_example_page which has an extra step to convert pages into
+    // drupal_get_form() and drupal_render().
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('kitchen_sink_example_form'),
+
+    'access arguments' => array('access content'),
+  );
+  
+  /*
+  $items['basicform'] = array(
+    'title' => 'Basic Form Example',
+    'page callback' => 'basicform_example_page',
+    'access arguments' => array('access content'),
+  );
+  */
+  
+  $items['kitchen-sink/autohamster'] = array(
+    'page callback' => 'kitchen_sink_autocomplete_hamster',
+    'access arguments' => array('access content'),
+  );
+  
+  return $items;
+}
+
+function kitchen_sink_example_form($form, &$form_state) {
+  
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#required' => TRUE,
+    '#default_value' => !empty($GLOBALS['user']->name) ? $GLOBALS['user']->name : '',
+    '#weight' => -2,
+  );
+  
+  $form['group_one'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Group One'),
+  );
+  
+  // Have separate machine keys and display values so that any t() function
+  // changes do not cause coding problems.
+  $departments = array(
+    ''        => t('--Select a Department--'),
+    'service' => t('Customer Service'),
+    'hr'      => t('Human Resources'),
+    'it'      => t('Information Technology'),
+    'sales'   => t('Sales'),
+  );
+  $form['group_one']['department'] = array(
+    '#type' => 'select',
+    '#title' => t('Department'),
+    '#options' => $departments,
+    '#default_value' => 'it',
+    '#description' => t('Please enter a message here for us to read.'),
+  );
+  
+  $form['group_one']['department_multi'] = array(
+    '#type' => 'select',
+    '#title' => t('Departments (Multiselect)'),
+    '#options' => $departments,
+    '#multiple' => TRUE,
+    '#default_value' => array('it', 'service'),
+    '#size' => count($departments),
+  );
+  
+  $intervals = array(
+    'hourly'  => t('Hourly'),
+    'daily'   => t('Daily'),
+    'weekly'  => t('Weekly'),
+    'monthly' => t('Monthly'),
+  );
+  
+  $form['group_one']['receive_updates'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Receive Updates'),
+    '#options' => $intervals,
+    '#default_value' => array('daily'),
+  );
+  
+  $form['group_two'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Group Two'),
+    
+    // Collapsible and collapsed only apply to fieldsets.
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+  
+  $form['group_two']['subscribe'] = array(
+    '#type' => 'checkbox',
+    // For single checkboxes, the title is rendered to the right.
+    '#title' => t('Subscribe to our newsletter'),
+    '#default_value' => TRUE,
+  );
+  
+  $form['group_two']['gender'] = array(
+    '#type' => 'radios',
+    '#title' => t('Gender'),
+    '#options' => array('male' => t('Male'), 'female' => t('Female')),
+  );
+  
+  $form['group_two']['message'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Message'),
+    '#rows' => 5,
+  
+    // Description is available for almost all form elements. Will display under
+    // the form element.
+    '#description' => t('Please enter a message here for us to read.'),
+  );
+  
+  $form['group_three'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Group Three'),
+  );
+  
+  $form['group_three']['username'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Username'),
+    '#maxlength' => 10,
+    '#size' => 30,
+    '#attributes' => array(
+      'class' => array('kitchen-sink-highlight', 'some-other-class'),
+      'data-foo' => 'bar',
+    ),
+    '#description' => t('Your username can be a maximum of 10 characters.'),
+  );
+  
+  $form['group_three']['password'] = array(
+    '#type' => 'password',
+    '#title' => t('Simple Password'),
+    '#maxlength' => 10,
+    '#size' => 30,
+    '#description' => t('Please enter a password'),
+  );
+  
+  $form['group_three']['password_two'] = array(
+    '#type' => 'password_confirm',
+    
+    // To avoid redundancy with the element, title can be omitted.
+    // '#title' => t('Password (with confirm)'),
+    
+    // maxlength and size do not limit elements of type password_confirm.
+    // '#maxlength' => 10,
+    // '#size' => 30,
+  );
+  
+  $form['group_four'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Group Four'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  
+  $form['group_four']['total'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Total'),
+    '#field_prefix' => '$',
+    '#size' => 10,
+  );
+  
+  $form['group_four']['amount'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Amount'),
+    '#field_suffix' => 'grams',
+    '#size' => 10,
+    
+    // Weight can be adjusted to reorder elements within the fieldset. Default
+    // weight is 0 and unless there is a weight override the elements will 
+    // appear in the order that they were added to the array.
+    '#weight' => -1,
+  );
+  
+  $form['group_four']['order_notes'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Order Notes'),
+    
+    // Prefix and suffix will appear completely above or below any element.
+    // Contrast field_prefix and field_suffix.
+    '#prefix' => '<p>' . t('Enter any order notes below.') . '</p>',
+    '#suffix' => '<p>' . t('Enter any order notes above.') . '</p>',
+  );
+  
+  $form['group_five'] = array(
+    '#tree' => TRUE,
+  );
+  
+  // Disabled form elements will not pass values on the form submit. This is not
+  // Drupal but rather a basic HTML standard.
+  $form['group_five']['disabled_text'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Disabled Text'),
+    '#default_value' => t('This is some default text.'),
+    '#disabled' => TRUE,
+  );
+  
+  // Read-only text which is done through the attributes will pass values on
+  // the form submit. The read-only text is selectable within the browser but
+  // cannot be modified.
+  $form['group_five']['readonly_text'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Read-only Text'),
+    '#default_value' => t('This is some default text.'),
+    '#attributes' => array('readonly' => 'readonly', 
+                           'class' => array('kitchen-sink-highlight', 'some-other-class')),
+  );
+  
+  // Hidden element types appear in the HTML of the browser.
+  $form['group_five']['secret_value'] = array(
+    '#type' => 'hidden',
+    '#value' => 'the secret password',
+  );
+  
+  // Value element types does not appear in HTML of the browser. This value will
+  // be merged back into the form variables. Drupal will keep track of this
+  // value and match up these form token values on submit.
+  $form['group_five']['supersecret_value'] = array(
+    '#type' => 'value',
+    '#value' => 'the supersecret password',
+  );
+  
+  // Originally configured as below is functionally equivalent to supersecret_
+  // password.
+  $form['group_five']['topsecret_value'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Top Secret Password'),
+    '#default_value' => 'the top secret password',
+    
+    // '#access' => TRUE,
+    '#access' => user_access('is user 1'),
+  );
+  
+  // user/autocomplete is a built-in Drupal page.
+  // http://localhost:8080/drupaltutor/d7md/user/autocomplete/d
+  $form['group_five']['user_ac'] = array(
+    '#type' => 'textfield',
+    '#title' => t('User Account'),
+    '#autocomplete_path' => 'user/autocomplete',
+  );
+  
+  // http://localhost:8080/drupaltutor/d7md/kitchen-sink/autohamster/b
+  $form['group_five']['custom_ac'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Custom Autocomplete'),
+    '#autocomplete_path' => 'kitchen-sink/autohamster',
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit Form'),
+  );
+  
+  $form['othersubmit'] = array(
+    '#type' => 'submit',
+    '#value' => t('No, use me!'),
+  );
+  
+  
+  $form['start_line'] = array(
+    '#type' => 'markup',
+    '#markup' => '<p><strong>' . t('Congratulations!') . 
+                 '</strong> ' . t('You wre about to begin your forms adventure.') . 
+                 '</p>',
+    '#weight' => -10,
+  );
+  
+  $form['finish_line'] = array(
+    '#type' => 'markup',
+    '#markup' => '<p><strong>' . t('Congratulations!') . 
+                 '</strong> ' . t('You have made it to the end of the form.') . 
+                 '</p>',
+  );
+  
+  // drupal_add_css does not work to well with forms. It works when the form is
+  // first loaded but if the form fails validation, the CSS sometimes does not
+  // get reloaded.
+  $form['#attached']['css'] = array(
+    drupal_get_path('module', 'kitchen_sink') . '/css/kitchen_sink.css',
+  );
+  
+  /*
+   * $form['#attached'['css'] = array(
+   *   drupal_get_path('module', 'kithen_sink') . '/js/kitchen_sink.js',
+   * );
+   */
+  
+  // By default, all results in $form_state['values'] will be flattened away 
+  // from their enclosing fieldsets and key parameters will need to be unique.
+  // To avoid flattening set the tree attribute to be TRUE.
+  // The tree key can be done on a specific fieldsets.
+  // 
+  // Result combinations:
+  //  * visbile heirarchy / flat result (default)
+  //  * visible heirarchy / heirachy result
+  //  * visibly flat / heirarchy result
+  $form['#tree'] = TRUE;
+ 
+    
+  return $form;
+}
+
+function kitchen_sink_autocomplete_hamster($string = '') {
+  $matches = array();
+  if ($string) {
+    $result = db_select('hamster')
+                ->fields('hamster', array('name'))
+                ->condition('name', db_like($string) . '%', 'LIKE')
+                ->range(0, 10)
+                ->execute();
+    foreach ($result as $user) {
+      $matches[$user->name] = check_plain($user->name);
+    }
+  }
+
+  drupal_json_output($matches);
+}
+
+function kitchen_sink_example_form_submit($form, &$form_state) {
+  drupal_set_message(t('Form successfully submitted.'), 'status');
+  dpm($form_state);
+}
