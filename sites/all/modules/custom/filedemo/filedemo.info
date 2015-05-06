@@ -1,0 +1,5 @@
+name = File Demo
+description = Examples of how to have managed and unmanaged files
+core = 7.x
+version = 7.x-1.x
+package = DrupalTutor

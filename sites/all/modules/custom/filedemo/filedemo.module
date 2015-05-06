@@ -1,0 +1,98 @@
+<?php
+
+function filedemo_menu() {
+  $items = array();
+  
+  $items['filedemo'] = array(
+    'title' => 'File Upload Demo',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('filedemo_form'),
+    'access arguments' => array('access content'),
+  );
+  
+  $items['filedemo-managed'] = array(
+    'title' => 'Managed File Upload Demo',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('filedemo_managed_form'),
+    'access arguments' => array('access content'),
+  );
+  
+  return $items;
+}
+
+function filedemo_form($form, &$form_state) {
+  $form['demo'] = array(
+    '#type' => 'file',
+    '#title' => t('Upload your file here'),
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  
+  return $form;
+}
+
+function filedemo_form_submit($form, &$form_state) {
+  // Because this an unmanaged file form, $form['values']['demo'] will be empty.
+  dpm($form_state);
+  // Super global which setup a bit unusually where the attributes appear in the
+  // array path 
+  dpm($_FILES);
+  
+  $directory = file_build_uri('filedemo');
+  dpm($directory);
+  
+  // Create the destination directory if does not exist.
+  file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
+  
+  $filepath = file_unmanaged_move($_FILES['files']['tmp_name']['demo'],
+                                  file_build_uri('filedemo/' .  $_FILES['files']['name']['demo']));
+
+  $url = file_create_url($filepath);
+  drupal_set_message(t('Your file is here: !url', array('!url' => l($url, $url))));
+  
+}
+
+function filedemo_managed_form($form, &$form_state) {
+  // Will have an "Upload" button as part of the form element. This uploads
+  // the file to a FILE_STATUS_TEMPORARY. The "Remove" button will also appear
+  // and allow the managed file to be removed from the database. Expect there
+  // to be missing "fid" keys.
+  $form['demo_fid'] = array(
+    '#title' => t('Upload you file here'),
+    '#type' => 'managed_file',
+    '#upload_location' => 'public://filedemo_managed',
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  
+  return $form;
+}
+
+function filedemo_managed_form_submit($form, &$form_state) {
+  dpm($form_state);
+  
+  // Retrieve file info from "file_managed".
+  $file = file_load($form_state['values']['demo_fid']);
+  
+  // Make sure the file status becomes permanent otherwise the just "uploaded"
+  // will be delete in six hours.
+  $file->status = FILE_STATUS_PERMANENT;
+  file_save($file);
+  
+  // Update table "file_usage".
+  // file_usage_add(stdClass $file, $module, $type, $id, $count = 1);
+  file_usage_add($file, 'filedemo', 'user', $GLOBALS['user']->uid);
+  
+  dpm($file);
+  
+  $url = file_create_url($file->uri);
+  drupal_set_message(t('Your FID is @fid, your file is here: !url', 
+                       array('@fid' => $file->fid, '!url' => l($url, $url))));
+}
+
