@@ -1,0 +1,79 @@
+<?php
+
+// OK
+// function agreetopost_form_alter(&$form, &$form_state, $form_id) { }}
+
+// Better
+function agreetopost_form_article_node_form_alter(&$form, &$form_state, $form_id) {
+  // dpm($form_id);
+  dpm($form);
+  dpm($form_state);
+  
+  $form['title']['#title'] = t('Article Title');
+  $form['title']['#size'] = 100;
+  
+  $form['field_image']['#weight'] = -4;
+  $form['body']['#weight'] = -3;
+  
+  $form['field_image']['#access'] = user_access('Is super admin');
+  
+  $form['agreetopost'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('I agree to the Terms and Conditions of this site.'),
+    '#weight' => 100,
+  );
+  $form['actions']['#weight'] = 101;
+  
+  if (!empty($form['nid']['#value'])) {
+    $form['agreetopost']['#disabled'] = TRUE;
+    $form['agreetopost']['#default_value'] = TRUE;
+  }
+  
+  $form['#validate'][] = 'agreetopost_node_validate_form';
+  
+  // Unable to use the simplest submit handler because the form has the submit
+  // handlers installed on the actual submit buttons.
+  // $form['#submit'][] = 'agreetopost_node_submit';
+  
+  // $form['actions']['submit']['#submit'][] = 'agreetopost_node_submit_form';
+  // $form['actions']['preview']['#submit'][] = 'agreetopost_node_preview_form';
+  // 
+  // Pop my submit functions to the front of the array so that they run first.
+  array_unshift($form['actions']['submit']['#submit'], 'agreetopost_node_submit_form');
+  array_unshift($form['actions']['preview']['#submit'], 'agreetopost_node_preview_form');
+  
+  // Custom actions on a delete do not seem to make a lot of sense because of
+  // there is a second chance screen. Create another form alter against
+  // form ID: node_delete_confirm.
+  // $form['actions']['delete']['#submit'][] = 'agreetopost_node_delete_form';
+
+  // Display form array that is now updated.
+  dpm($form);
+}
+
+// IMPORTANT:
+// Be careful when naming functions. Can accidentally set off extra calls to the
+// callback functions.
+// * hook_node_submit()
+// * hook_node_validate()
+
+function agreetopost_node_validate_form($form, &$form_state) {
+ // A limitaton of HTML checkboxes will prevent the element from turning red.
+ if (isset($form_state['values']['agreetopost']) && empty($form_state['values']['agreetopost'])) {
+    form_set_error('agreetopost', t('You must agree to Terms and Conditions.'));
+  }
+}
+
+function agreetopost_node_submit_form($form, &$form_state) {
+ if (isset($form_state['values']['agreetopost']) && !empty($form_state['values']['agreetopost'])) {
+    drupal_set_message(t('You have agreed to the Terms and Conditions of this website.'));
+  }
+}
+
+function agreetopost_node_preview_form($form, &$form_state) {
+  dpm(t('Custom action on Preview'));
+}
+
+function agreetopost_node_delete_form($form, &$form_state) {
+  dpm(t('Custom action on Delete'));
+}
