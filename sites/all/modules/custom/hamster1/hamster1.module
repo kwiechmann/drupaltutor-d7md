@@ -2,71 +2,71 @@
 
 define('HAMSTER_ITEMS_PER_PAGE', 5);
 
-function hamster_menu() {
+function hamster1_menu() {
   $items = array();
   
-  $items['hamster'] = array(
+  $items['hamster1'] = array(
     'title' => 'Hamsters',
-    'page callback' => 'hamster_list',
-    'access arguments' => array('view hamster'),
+    'page callback' => 'hamster1_list',
+    'access arguments' => array('view hamster1'),
   );
   
-  $items['hamster/%hamster'] = array(
-    'title callback' => 'hamster_page_title',
+  $items['hamster1/%hamster1'] = array(
+    'title callback' => 'hamster1_page_title',
     'title arguments' => array(1),
-    'page callback' => 'hamster_page',
+    'page callback' => 'hamster1_page',
     'page arguments' => array(1),
-    'access arguments' => array('view hamster'),
+    'access arguments' => array('view hamster1'),
   );
   
-  $items['hamster/insert'] = array(
+  $items['hamster1/insert'] = array(
     'title' => 'DB Insert',
-    'page callback' => 'hamster_insert',
-    'access arguments' => array('edit hamsters'),
+    'page callback' => 'hamster1_insert',
+    'access arguments' => array('edit hamster1s'),
   );
   
-  $items['hamster/update'] = array(
+  $items['hamster1/update'] = array(
     'title' => 'DB Update',
-    'page callback' => 'hamster_update',
-    'access arguments' => array('edit hamsters'),
+    'page callback' => 'hamster1_update',
+    'access arguments' => array('edit hamster1s'),
   );
   
-  $items['hamster/delete'] = array(
+  $items['hamster1/delete'] = array(
     'title' => 'DB Delete',
-    'page callback' => 'hamster_delete',
-    'access arguments' => array('edit hamsters'),
+    'page callback' => 'hamster1_delete',
+    'access arguments' => array('edit hamster1s'),
   );
   
-  $items['hamster-oo'] = array(
+  $items['hamster1-oo'] = array(
     'title' => 'Hamsters',
-    'page callback' => 'hamster_oo_list',
-    'access arguments' => array('view hamster'),
+    'page callback' => 'hamster1_oo_list',
+    'access arguments' => array('view hamster1'),
   );
   
-   $items['hamster-oo/%'] = array(
+   $items['hamster1-oo/%'] = array(
     'title' => 'Hamsters',
-    'page callback' => 'hamster_oo_list',
+    'page callback' => 'hamster1_oo_list',
     'page arguments' => array(1),
-    'access arguments' => array('view hamster'),
+    'access arguments' => array('view hamster1'),
   );
   
-  $items['hamster-write/insert'] = array(
+  $items['hamster1-write/insert'] = array(
     'title' => 'DB Insert Write',
-    'page callback' => 'hamster_write_insert',
-    'access arguments' => array('edit hamsters'),
+    'page callback' => 'hamster1_write_insert',
+    'access arguments' => array('edit hamster1s'),
   );
   
-  $items['hamster-write/update'] = array(
+  $items['hamster1-write/update'] = array(
     'title' => 'DB Update Write',
-    'page callback' => 'hamster_write_update',
-    'access arguments' => array('edit hamsters'),
+    'page callback' => 'hamster1_write_update',
+    'access arguments' => array('edit hamster1s'),
   );
   
   return $items;
 }
 
-function hamster_insert() {
-  db_query("INSERT INTO {hamster} (name, gender, weight, birthdate, image, habitat_id)
+function hamster1_insert() {
+  db_query("INSERT INTO {hamster1} (name, gender, weight, birthdate, image, habitat_id)
             VALUES (:name, :gender, :weight, :birthdate, :image, :habitat_id)",
     array(
       ':name' => 'Test',
@@ -81,8 +81,8 @@ function hamster_insert() {
   return t('Insertion complete.');
 }
 
-function hamster_update() {
-  db_query("UPDATE {hamster} 
+function hamster1_update() {
+  db_query("UPDATE {hamster1} 
               SET 
                 name = 'Updated Test', 
                 habitat_id = :habitat_id
@@ -96,8 +96,8 @@ function hamster_update() {
   return t('Updating complete.');
 }
 
-function hamster_delete() {
-  db_query("DELETE FROM {hamster} 
+function hamster1_delete() {
+  db_query("DELETE FROM {hamster1} 
             WHERE name = :name",
     array(
       ':name' => 'Updated Test',
@@ -107,67 +107,67 @@ function hamster_delete() {
   return t('Deleting complete.');
 }
 
-function hamster_load($id) {
+function hamster1_load($id) {
   $result = db_query("SELECT
                         h.*,
                         hh.name AS habitat_name
-                      FROM {hamster} AS h
-                      LEFT JOIN {hamster_habitat} AS hh
+                      FROM {hamster1} AS h
+                      LEFT JOIN {hamster1_habitat} AS hh
                       ON
                         h.habitat_id = hh.id
-                      WHERE h.id = :hamster_id",
-                      array(':hamster_id' => $id)
+                      WHERE h.id = :hamster1_id",
+                      array(':hamster1_id' => $id)
                     )->fetchObject();
     
   return $result;
 }
 
-function hamster_theme($existing, $type, $theme, $path) {
+function hamster1_theme($existing, $type, $theme, $path) {
   return array(
-    'hamster_info' => array(
-      'variables' => array('hamster' => NULL),
+    'hamster1_info' => array(
+      'variables' => array('hamster1' => NULL),
     ),
   );
 }
 
-function theme_hamster_info($variables) {
-  $hamster = $variables['hamster'];
+function theme_hamster1_info($variables) {
+  $hamster1 = $variables['hamster1'];
 
-  drupal_add_css(drupal_get_path('module', 'hamster') . '/css/hamster.css');
+  drupal_add_css(drupal_get_path('module', 'hamster1') . '/css/hamster1.css');
   
   $output = '';
   
-  $output .= '<div class="hamster-page">';
+  $output .= '<div class="hamster1-page">';
   
-  if (!empty($hamster->image)) {
-    $output .= '<div>' . theme('image', array('path' => file_build_uri($hamster->image), 'style' => 'large')) . '</div>';
+  if (!empty($hamster1->image)) {
+    $output .= '<div>' . theme('image', array('path' => file_build_uri($hamster1->image), 'style' => 'large')) . '</div>';
   }
-  $output .= '<div><label class="inline">' . t('ID') . ':</label>' . $hamster->id . '</div>';
-  $output .= '<div><label class="inline">' . t('Gender') . ':</label>' . $hamster->gender . '</div>';
-  $output .= '<div><label class="inline">' . t('Weight') . ':</label>' . t('@weight g', array('@weight' => $hamster->weight)) . '</div>';
-  $output .= '<div><label class="inline">' . t('Birth Date') . ':</label>' . format_date($hamster->birthdate, 'custom', 'Y-m-d') . '</div>';
-  $age = REQUEST_TIME - $hamster->birthdate;
+  $output .= '<div><label class="inline">' . t('ID') . ':</label>' . $hamster1->id . '</div>';
+  $output .= '<div><label class="inline">' . t('Gender') . ':</label>' . $hamster1->gender . '</div>';
+  $output .= '<div><label class="inline">' . t('Weight') . ':</label>' . t('@weight g', array('@weight' => $hamster1->weight)) . '</div>';
+  $output .= '<div><label class="inline">' . t('Birth Date') . ':</label>' . format_date($hamster1->birthdate, 'custom', 'Y-m-d') . '</div>';
+  $age = REQUEST_TIME - $hamster1->birthdate;
   $output .= '<div><label class="inline">' . t('Age') . ':</label>' . format_interval($age, 2) . '</div>';
-  $output .= '<div><label class="inline">' . t('Habitat') . ':</label>' . $hamster->habitat_name . '</div>';
+  $output .= '<div><label class="inline">' . t('Habitat') . ':</label>' . $hamster1->habitat_name . '</div>';
   
   $output .= '</div>';
   
   return $output;
  }
 
-function hamster_page($hamster) {
+function hamster1_page($hamster1) {
   // By calling the theme function, themers can alter the appearance of the
-  // hamster output from what is defined in theme_hamster_info to suit the 
+  // hamster1 output from what is defined in theme_hamster1_info to suit the 
   // required taste.
-  return theme('hamster_info', array('hamster' => $hamster));
+  return theme('hamster1_info', array('hamster1' => $hamster1));
 }
 
-function hamster_page_title($hamster) {
-  return $hamster->name;
+function hamster1_page_title($hamster1) {
+  return $hamster1->name;
 }
 
-function hamster_oo_insert() {
-  db_insert('hamster')
+function hamster1_oo_insert() {
+  db_insert('hamster1')
     ->fields(array(
       'name' => 'Test',
       'gender' => 'male',
@@ -181,8 +181,8 @@ function hamster_oo_insert() {
   return t('Insertion complete.');
 }
 
-function hamster_oo_update() {
-  db_update('hamster')
+function hamster1_oo_update() {
+  db_update('hamster1')
     ->fields(array(
       'name' => 'Updated Test',
       'habitat_id' => 1,
@@ -193,19 +193,19 @@ function hamster_oo_update() {
   return t('Updating complete.');
 }
 
-function hamster_oo_delete() {
-  db_delete('hamster')
+function hamster1_oo_delete() {
+  db_delete('hamster1')
     ->condition('name', 'Updated Test', '=')
     ->execute();
   
   return t('Deleting complete.');
 }
 
-function hamster_oo_list($gender = NULL) {
+function hamster1_oo_list($gender = NULL) {
   $output = '';
   
-  $query = db_select('hamster', 'h');
-  $query->join('hamster_habitat', 'hh', 'h.habitat_id = hh.id');
+  $query = db_select('hamster1', 'h');
+  $query->join('hamster1_habitat', 'hh', 'h.habitat_id = hh.id');
   $query->fields('h');
   $query->addField('hh', 'name', 'habitat_name');
   
@@ -229,7 +229,7 @@ function hamster_oo_list($gender = NULL) {
     
     $row = array(
       $record->id,
-      l($record->name, 'hamster/' . $record->id),
+      l($record->name, 'hamster1/' . $record->id),
       $record->gender,
       t('@weight g', array('@weight' => $record->weight)),
       format_date($record->birthdate, 'custom', 'Y-m-d'),
@@ -261,19 +261,19 @@ function hamster_oo_list($gender = NULL) {
   return $output;
 }
 
-function hamster_list() {
+function hamster1_list() {
   $output = '';
   
   // For DB optimization, avoid * and use a specific DB field.
-  $total = db_query("SELECT COUNT(id) FROM {hamster}")->fetchField();
+  $total = db_query("SELECT COUNT(id) FROM {hamster1}")->fetchField();
   
   $page = pager_default_initialize($total, HAMSTER_ITEMS_PER_PAGE);
   
   $results = db_query_range("SELECT
                                h.*,
                                hh.name AS habitat_name
-                             FROM {hamster} AS h
-                             LEFT JOIN {hamster_habitat} AS hh
+                             FROM {hamster1} AS h
+                             LEFT JOIN {hamster1_habitat} AS hh
                              ON
                                h.habitat_id = hh.id
                              ORDER BY h.id ASC",
@@ -289,7 +289,7 @@ function hamster_list() {
     
     $row = array(
       $record->id,
-      l($record->name, 'hamster/' . $record->id),
+      l($record->name, 'hamster1/' . $record->id),
       $record->gender,
       t('@weight g', array('@weight' => $record->weight)),
       format_date($record->birthdate, 'custom', 'Y-m-d'),
@@ -324,8 +324,8 @@ function hamster_list() {
 // drupal_write_record() is usually used when an array or object is written to 
 // the database. Great for the simplicity of output. The second parameter is
 // either an array or image.
-function hamster_write_insert() {
-  $hamster = array(
+function hamster1_write_insert() {
+  $hamster1 = array(
     'name' => 'Test',
     'gender' => 'male',
     'weight' => 150,
@@ -335,30 +335,30 @@ function hamster_write_insert() {
   );
   
   // Requires that the tables be defined with a hook_schema() implementation.
-  drupal_write_record('hamster', $hamster);
+  drupal_write_record('hamster1', $hamster1);
   
   return t('Insertion complete.');
 }
 
-function hamster_write_update() {
-  $hamster = array(
+function hamster1_write_update() {
+  $hamster1 = array(
     'name' => 'Updated Test',
     'habitat_id' => 1,
   );
-  drupal_write_record('hamster', $hamster, array('name'));
+  drupal_write_record('hamster1', $hamster1, array('name'));
   
   return t('Updating complete.');
 }
 
-function hamster_permission() {
+function hamster1_permission() {
   return array(
-    'view hamster' => array(
+    'view hamster1' => array(
       'title' => t('View Hamster'),
-      'description' => t('View information about hamsters in the database.'),
+      'description' => t('View information about hamster1s in the database.'),
     ),
-    'view hamster' => array(
+    'view hamster1' => array(
       'title' => t('Edit Hamsters'),
-      'description' => t('Edit information about hamsters in the database.'),
+      'description' => t('Edit information about hamster1s in the database.'),
     ),
   );  
 }
