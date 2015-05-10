@@ -6,7 +6,7 @@ function hamster1_menu() {
   $items = array();
   
   $items['hamster1'] = array(
-    'title' => 'Hamsters',
+    'title' => 'Hamsters - 1',
     'page callback' => 'hamster1_list',
     'access arguments' => array('view hamster1'),
   );
@@ -20,44 +20,44 @@ function hamster1_menu() {
   );
   
   $items['hamster1/insert'] = array(
-    'title' => 'DB Insert',
+    'title' => 'Hamster - 1 DB Insert',
     'page callback' => 'hamster1_insert',
     'access arguments' => array('edit hamster1s'),
   );
   
   $items['hamster1/update'] = array(
-    'title' => 'DB Update',
+    'title' => 'Hamster - 1 DB Update',
     'page callback' => 'hamster1_update',
     'access arguments' => array('edit hamster1s'),
   );
   
   $items['hamster1/delete'] = array(
-    'title' => 'DB Delete',
+    'title' => 'Hamster - 1 DB Delete',
     'page callback' => 'hamster1_delete',
     'access arguments' => array('edit hamster1s'),
   );
   
   $items['hamster1-oo'] = array(
-    'title' => 'Hamsters',
+    'title' => 'Hamsters - OO',
     'page callback' => 'hamster1_oo_list',
     'access arguments' => array('view hamster1'),
   );
   
    $items['hamster1-oo/%'] = array(
-    'title' => 'Hamsters',
+    'title' => 'Hamsters - OO',
     'page callback' => 'hamster1_oo_list',
     'page arguments' => array(1),
     'access arguments' => array('view hamster1'),
   );
   
   $items['hamster1-write/insert'] = array(
-    'title' => 'DB Insert Write',
+    'title' => 'Hamster - 1 DB Insert Write',
     'page callback' => 'hamster1_write_insert',
     'access arguments' => array('edit hamster1s'),
   );
   
   $items['hamster1-write/update'] = array(
-    'title' => 'DB Update Write',
+    'title' => 'Hamster - 1 DB Update Write',
     'page callback' => 'hamster1_write_update',
     'access arguments' => array('edit hamster1s'),
   );
