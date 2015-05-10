@@ -1,9 +1,5 @@
-name = Hamster DB
+name = Hamster2 DB
+description = An example of how to work with databases in Drupal.
 core = 7.x
-
-description = An example of how to work databases in Drupal.
-version = 7.x-1.x
+version = 7.x-2.x
 package = DrupalTutor
-
-; Including here would put hamster.css into every page on the site.
-; stylesheets[all][] = css/hamster.css
