@@ -27,7 +27,12 @@ function hamster_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('hamster_edit_form'),
     'access arguments' => array('edit hamsters'),
+
+    // Include the 'file' parameter so that Drupal knows where to find the
+    // required form in the page arguments. By having a separate file Drupal
+    // has less work to do during a cache-clear.
     'file' => 'hamster.pages.inc',
+    
     'type' => MENU_LOCAL_ACTION,
   );
   
@@ -55,77 +60,7 @@ function hamster_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 2,
   );
-  
-  
-  /*
-   * These menu items below are all for database demos. Not part of 
-   * hamster application. Commenting them out so they don't run.
-   */
-  /*
-   *
-   $items['hamster/insert'] = array(
-    'title' => 'DB Insert',
-    'page callback' => 'hamster_insert',
-    'access arguments' => array('edit hamsters'),
-  );
-  
-  $items['hamster/update'] = array(
-    'title' => 'DB Update',
-    'page callback' => 'hamster_update',
-    'access arguments' => array('edit hamsters'),
-  );
-  
-  $items['hamster/delete'] = array(
-    'title' => 'DB Delete',
-    'page callback' => 'hamster_delete',
-    'access arguments' => array('edit hamsters'),
-  );
-  
-  $items['hamster-oo'] = array(
-    'title' => 'Hamsters',
-    'page callback' => 'hamster_oo_list',
-    'access arguments' => array('view hamster'),
-  );
-  
-   $items['hamster-oo/%'] = array(
-    'title' => 'Hamsters',
-    'page callback' => 'hamster_oo_list',
-    'page arguments' => array(1),
-    'access arguments' => array('view hamsters'),
-  );
-   
-   $items['hamster-oo/insert'] = array(
-    'title' => 'DB Insert',
-    'page callback' => 'hamster_oo_insert',
-    'access arguments' => array('edit hamsters'),
-  );
-  
-  $items['hamster-oo/update'] = array(
-    'title' => 'DB Update',
-    'page callback' => 'hamster_oo_update',
-    'access arguments' => array('edit hamsters'),
-  );
-  
-  $items['hamster-oo/delete'] = array(
-    'title' => 'DB Delete',
-    'page callback' => 'hamster_oo_delete',
-    'access arguments' => array('edit hamsters'),
-  );
-  
-    $items['hamster-write/insert'] = array(
-    'title' => 'DB Insert',
-    'page callback' => 'hamster_write_insert',
-    'access arguments' => array('edit hamsters'),
-  );
-  
-  $items['hamster-write/update'] = array(
-    'title' => 'DB Update',
-    'page callback' => 'hamster_write_update',
-    'access arguments' => array('edit hamsters'),
-  );
-   * 
-   */
-   
+    
   return $items;
 }
 
@@ -152,10 +87,17 @@ function theme_hamster_info($variables) {
   
   $output = '<div class="hamster-page">';
   
+  // Check to set if the image is defined as part of the hamster object.
   if (!empty($hamster->image)) {
+    // Because the image is a managed file, call file_load() to bring in the 
+    // image data.
     $image = file_load($hamster->image);
-    $output .= '<div>' . theme('image_style', array('path' => $image->uri, 'style_name' => 'large')) . '</div>';
+    // Be certain to check whether the image file data was actually loaded.
+    if (!empty($image)) {
+      $output .= '<div>' . theme('image_style', array('path' => $image->uri, 'style_name' => 'large')) . '</div>';
+    }    
   }
+  
   $output .= '<div><label class="inline">' . t('ID') . ':</label>' . $hamster->id . '</div>';
   $output .= '<div><label class="inline">' . t('Gender') . ':</label>' . $hamster->gender . '</div>';
   $output .= '<div><label class="inline">' . t('Weight') . ':</label>' . t('@weight g', array('@weight' => $hamster->weight)). '</div>';
@@ -165,6 +107,7 @@ function theme_hamster_info($variables) {
   $output .= '<div><label class="inline">' . t('Habitat') . ':</label>' . $hamster->habitat_name . '</div>';
   
   $output .= '</div>';
+  
   return $output;
 }
 
@@ -187,168 +130,10 @@ function hamster_permission() {
       'title' => t('View Hamsters'),
       'description' => t('View information about hamsters in the database.'),
     ),
+    
     'edit hamsters' => array(
       'title' => t('Edit Hamsters'),
       'description' => t('Edit information about hamsters in the database.'),
     ),
   );
 }
-
-
-
-
-/*
- * These functions below are all for database demos. Not part of 
- * hamster application. Commenting them out.
- */
-
-/*
- * 
-function hamster_write_update() {
-  $hamster = array(
-    'id' => 1,
-    'habitat_id' => 1,
-  );
-  drupal_write_record('hamster', $hamster, array('id'));
-  
-  return t('Updated');
-}
-
-function hamster_write_insert() {
-  $hamster = array(
-    'name' => 'Test',
-    'gender' => 'male',
-    'weight' => 150,
-    'birthdate' => REQUEST_TIME,
-    'image' => '',
-    'habitat_id' => 3,
-  );
-  
-  drupal_write_record('hamster', $hamster);
-
-  return t('Done');
-}
-
-
-function hamster_delete() {
-  db_query("DELETE FROM {hamster} WHERE name = :name", 
-    array(
-      ':name' => 'Test',
-    )
-  );
-  return t('Deleted');
-}
-
-
-function hamster_update() {
-  db_query("UPDATE {hamster} SET habitat_id = :habitat WHERE name = :name", 
-    array(
-      ':name' => 'Test',
-      ':habitat' => 1,
-    )
-  );
-  return t('Updated');
-}
-
-function hamster_insert() {
-  db_query("INSERT INTO {hamster} (name, gender, weight, birthdate, image, habitat_id) 
-            VALUES (:name, :gender, :weight, :birth, :image, :habitat)", 
-    array(
-      ':name' => 'Test',
-      ':gender' => 'male',
-      ':weight' => 150,
-      ':birth' => REQUEST_TIME,
-      ':image' => '',
-      ':habitat' => 3,
-    )
-  );
-  return t('Done');
-}
-
-
-function hamster_oo_list($gender = NULL) {
-  $output = '';
-  
-  $query = db_select('hamster', 'h');
-  $query->join('hamster_habitat', 'hh', 'h.habitat_id = hh.id');
-  $query->fields('h');
-  $query->addField('hh', 'name', 'habitat_name');
-  if (!empty($gender)) {
-    $query->condition('h.gender', $gender, '=');
-  }
-  $query->orderBy('h.id');
-  $query = $query->extend('PagerDefault')->limit(10);
-  $results = $query->execute();
-    
-  $rows = array();
-  foreach ($results as $record) {
-    $row = array(
-      $record->id,
-      l($record->name, 'hamster/' . $record->id),
-      $record->gender,
-      t('@weight g', array('@weight' => $record->weight)),
-      format_date($record->birthdate, 'custom', 'Y-m-d'),
-      theme('image_style', array('style_name' => 'thumbnail', 'path' => file_build_uri($record->image))),
-      $record->habitat_name,
-    );
-    $rows[] = $row;
-  }
-  
-  $header = array(
-    t('ID'),
-    t('Name'),
-    t('Gender'),
-    t('Weight'),
-    t('Birth Date'),
-    t('Image'),
-    t('Habitat'),
-  );
-  
-  $variables = array(
-    'rows' => $rows,
-    'header' => $header,
-  );
-  
-  $output .= theme('table', $variables);
-  $output .= theme('pager');
-  
-  return $output;
-}
-
-function hamster_oo_delete() {
-  
-  db_delete('hamster')
-    ->condition('name', 'Test')
-    ->execute();
-  
-  return t('Deleted');
-}
-
-
-function hamster_oo_update() {
-  
-  db_update('hamster')
-    ->fields(array(
-      'habitat_id' => 1,
-    ))
-    ->condition('name', 'Test', '=')
-    ->execute();
-  return t('Updated');
-}
-
-function hamster_oo_insert() {
-
-  db_insert('hamster')
-    ->fields(array(
-      'name' => 'Test',
-      'gender' => 'male',
-      'weight' => 150,
-      'birthdate' => REQUEST_TIME,
-      'image' => '',
-      'habitat_id' => 3,
-    ))
-    ->execute();
-  
-  return t('Done');
-}
-*/

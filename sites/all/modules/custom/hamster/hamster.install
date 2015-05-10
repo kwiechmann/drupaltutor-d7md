@@ -33,8 +33,8 @@ function hamster_schema() {
     ),
     'image' => array(
       'description' => 'TODO: please describe this field!',
-      'type' => 'varchar',
-      'length' => '255',
+      // Converted image field from varchar(255) to int to not waste space.
+      'type' => 'int',
       'not null' => TRUE,
     ),
     'habitat_id' => array(

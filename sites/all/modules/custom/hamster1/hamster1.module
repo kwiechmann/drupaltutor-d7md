@@ -1,6 +1,6 @@
 <?php
 
-define('HAMSTER_ITEMS_PER_PAGE', 5);
+define('HAMSTER1_ITEMS_PER_PAGE', 5);
 
 function hamster1_menu() {
   $items = array();
@@ -217,7 +217,7 @@ function hamster1_oo_list($gender = NULL) {
   }
   // orderBy() defaults to ASC order.
   $query->orderBy('h.id', 'ASC');
-  $query = $query->extend('PagerDefault')->limit(HAMSTER_ITEMS_PER_PAGE);
+  $query = $query->extend('PagerDefault')->limit(HAMSTER1_ITEMS_PER_PAGE);
   $results = $query->execute();
   
   $rows = array();
@@ -267,7 +267,7 @@ function hamster1_list() {
   // For DB optimization, avoid * and use a specific DB field.
   $total = db_query("SELECT COUNT(id) FROM {hamster1}")->fetchField();
   
-  $page = pager_default_initialize($total, HAMSTER_ITEMS_PER_PAGE);
+  $page = pager_default_initialize($total, HAMSTER1_ITEMS_PER_PAGE);
   
   $results = db_query_range("SELECT
                                h.*,
@@ -277,8 +277,8 @@ function hamster1_list() {
                              ON
                                h.habitat_id = hh.id
                              ORDER BY h.id ASC",
-                            $page * HAMSTER_ITEMS_PER_PAGE,
-                            HAMSTER_ITEMS_PER_PAGE);
+                            $page * HAMSTER1_ITEMS_PER_PAGE,
+                            HAMSTER1_ITEMS_PER_PAGE);
   
   $rows = array();
   foreach ($results as $record) {
