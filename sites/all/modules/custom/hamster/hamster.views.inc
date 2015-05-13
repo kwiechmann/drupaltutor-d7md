@@ -100,8 +100,64 @@ function hamster_views_data() {
     'field' => array(
       'handler' => 'views_handler_field',
     ),
+    'relationship' => array(
+      'label' => t('Habitat'),
+      'base' => 'hamster_habitat',
+      'base field' => 'id',
+    )
   );
   
+  // Habitat Table
+  // hamster_habitat will not be set up to make it a base table. This will 
+  // prevent users making view of just the hamster habitat information
+  $data['hamster_habitat']['table'] = array(
+    'group' => t('Hamster Habitat'),
+    'title' => t('Hamster Habitat Information'),
+    'help' => t('List information about hamster cages.'),
+  );
+  
+  $data['hamster_habitat']['id'] = array(
+    'title' => t('ID'),
+    'help' => t('The ID of the hamster habitat.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
+  $data['hamster_habitat']['name'] = array(
+    'title' => t('Name'),
+    'help' => t('The name of the hamster habitat.'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
+  $data['hamster_habitat']['capacity'] = array(
+    'title' => t('capacity'),
+    'help' => t('The capacity of the hamster habitat.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
   return $data;
 }
 
