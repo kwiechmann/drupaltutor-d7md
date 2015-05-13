@@ -1,5 +1,9 @@
-name = Hamster2 DB
+name = Hamster 2 DB
 description = An example of how to work with databases in Drupal.
 core = 7.x
 version = 7.x-2.x
 package = DrupalTutor
+
+dependencies[] = views
+
+files[] = includes/hamster_views_handler_field_image.inc

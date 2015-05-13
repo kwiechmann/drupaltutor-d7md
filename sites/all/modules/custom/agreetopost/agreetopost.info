@@ -1,5 +1,5 @@
-title = Agree to Post
+name = Agree to Post
 description = Forces users to agree to the websites's terms and conditions before posting a comment.
 core = 7.x
 version = 7.x-1.x
-package = Drupal Tutor
+package = DrupalTutor

@@ -90,7 +90,12 @@ function hamster_views_data() {
     'title' => t('Image File ID'),
     'help' => t('The image file ID of the hamster.'),
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'hamster_views_handler_field_image',
+    ),
+    'relationship' => array(
+      'label' => t('Image'),
+      'base' => 'file_manage',
+      'base field' => 'fid',
     ),
   );
   
