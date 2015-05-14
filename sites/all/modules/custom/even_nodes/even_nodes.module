@@ -1,0 +1,7 @@
+<?php
+
+function even_nodes_views_api() {
+  return array(
+    'api' => 3,
+  );
+}

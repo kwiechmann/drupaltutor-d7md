@@ -1,0 +1,6 @@
+name = Even Nodes
+core = 7.x
+
+description = Only show nodes within views that have even node IDs.
+version = 7.x-1.x
+package = DrupalTutor
