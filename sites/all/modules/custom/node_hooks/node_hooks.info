@@ -1,0 +1,6 @@
+name = Node Hooks
+core = 7.x
+
+description = A bunch of useful hooks related to the life cycle of a node.
+version = 7.x-1.x
+package = DrupalTutor
