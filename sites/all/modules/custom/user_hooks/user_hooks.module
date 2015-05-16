@@ -1,0 +1,138 @@
+<?php
+
+/**
+ * Implements hook_user_load().
+ * 
+ * @param type $users
+ */
+function user_hooks_user_load($users) {
+  // Add pig-latin title to all usernames
+  foreach ($users as $uid => $user) {
+    $users[$uid]->user_hooks_name = ucfirst(__user_hooks_translate_to_pig_latin(strtolower($user->name)));
+  }
+  
+  // dpm($users);
+}
+
+/**
+ * Implements hook_user_view().
+ * 
+ * @param type $account
+ * @param type $view_mode
+ * @param type $langcode
+ */
+function user_hooks_user_view($account, $view_mode, $langcode) {
+  if ($view_mode == 'full' && !empty($account->user_hooks_name)) {
+    $account->content['user_hooks'] = array(
+      '#markup' => '<dl><dt>' . t('Pig Latin Name') . '</dt><dd>' . $account->user_hooks_name . '</dd></dl>',
+      '#weight' => 100,
+    );
+    
+    // dpm($account);
+  }
+}
+
+/**
+ * Implements hook_user_presave().
+ * 
+ * @param type $edit
+ * @param type $account
+ * @param type $category
+ */
+function user_hooks_user_presave(&$edit, $account, $category) {
+  watchdog('user_hooks', "I'm about to save @user.", array('@user' => $account->name));
+}
+
+/**
+ * Implementation of hook_user_insert().
+ * 
+ * @param type $node
+ */
+function user_hooks_user_insert(&$edit, $account, $category) {
+  // Entire presaving has been completed.
+
+  watchdog('user_hooks', '@logged_in_user created user !user',
+    array(
+      '@logged_in_user' => $GLOBALS['user']->name, 
+      '!user' => l($account->name, 'user/' . $account->uid),
+    )
+  );
+  
+}
+
+/**
+ * 
+ * @param type $edit
+ * @param type $account
+ * @param type $category
+ */
+function user_hooks_user_update(&$edit, $account, $category) {
+  watchdog('user_hooks', '@logged_in_user updated user !user',
+    array(
+      '@logged_in_user' => $GLOBALS['user']->name, 
+      '!user' => l($account->name, 'user/' . $account->uid),
+    )
+  );
+  
+}
+
+/**
+ * Implements hook_user_delete().
+ * 
+ * @param type $account
+ */
+function user_hooks_user_delete($account) {
+  // Delete has already been done. Use this to cleanup any additional
+  // information.
+  drupal_set_message(t('Deleted %name. Ouch! that hurts.', array('%name' => $account->name)), 'warning');  
+}
+
+/**
+ * Implements hook_user_login().
+ * 
+ * @param type $edit
+ * @param type $account
+ */
+function user_hooks_user_login(&$edit, $account) {
+  // Runs after login is complete.
+  drupal_set_message(t('Howdy %user!', array('%user' => $account->name)));
+}
+
+/**
+ * Implements hook_user_logout().
+ * 
+ * @param type $account
+ */
+function user_hooks_user_logout($account) {
+  // Runs before logout is complete.
+  if ($account->name == 'bob') {
+    drupal_set_message(t("I am sorry %user. I afraid can't let you do that.", array('%user' => $account->name)));
+    
+    // drupal_goto() *stops* any further actions and redirect to the destination.
+    // For forms, use form_state_redirect()
+    drupal_goto('<front>');
+  }
+}
+
+/**
+ * Translate string to Pig Latin.
+ *
+ * @param type $string
+ * @return type
+ */
+function __user_hooks_translate_to_pig_latin($string) {
+  $words = explode(' ', $string);
+  $pig_latin = array();
+  $vowels = array('a', 'e', 'i', 'o', 'y');
+  
+  foreach ($words as $word) {
+    if (in_array(strtolower(substr($word, 0, 1)), $vowels)) {
+      $pig_latin[] = $word . 'way';
+    }
+    else {
+      $pig_latin[] = substr($word, 1) . substr($word, 0, 1) . 'ay';
+    }
+  }
+  
+  return implode(' ',$pig_latin);
+}
