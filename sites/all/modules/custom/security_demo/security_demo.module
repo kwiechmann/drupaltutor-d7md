@@ -1,0 +1,38 @@
+<?php
+
+// * Permissions levels for pages restrict access.
+// * Cross-site scripting with JavaScript.
+// * SQL injection.
+
+function security_demo_menu() {
+  $items = array();
+  
+  $items['insecure-node/%node'] = array(
+    'title callback' => 'security_demo_node_title',
+    'title arguments' => array(1),
+    'page callback' => 'security_demo_node_body',
+    'page arguments' => array(1),
+    'access arguments'  => array('access content'),
+  );
+  
+  return $items;
+}
+
+function security_demo_node_title($node) {
+  return $node->title;
+}
+
+function security_demo_node_body($node) {
+  dpm($node);  
+  
+  // By accessing the content directly, the content will not have been
+  // sanitized.
+  // return $node->body[LANGUAGE_NONE][0]['value'];
+  
+  // A safe value should be included within in the node.
+  return $node->body[LANGUAGE_NONE][0]['safe_value'];
+}
+
+function security_demo_node_presave($node) {
+  db_query("INSERT INTO {security_demo} (log) VALUES ('Node saved: " . $node->title . "')");
+}

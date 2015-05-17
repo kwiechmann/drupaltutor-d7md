@@ -1,0 +1,6 @@
+name = Security Demo
+core = 7.x
+
+description = A demonstration of secure and insecure coding practices with Drupal.
+package = DrupalTutor
+version = 7.x-1.x
