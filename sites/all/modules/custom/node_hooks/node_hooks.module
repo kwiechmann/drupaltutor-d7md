@@ -28,7 +28,9 @@ function node_hooks_node_load($nodes, $types) {
 function node_hooks_node_view($node, $view_mode, $langcode) {
   if ($view_mode == 'full' && !empty($node->node_hooks_title)) {
     $node->content['node_hooks'] = array(
-      '#markup' => '<div class="node-hooks"><strong>' . t('Pig Latin Title') . ':</strong> ' . $node->node_hooks_title . '</div>',
+      // Do not forget to sanitize $node->node_hools_title which is based on
+      // user entered input.
+      '#markup' => '<div class="node-hooks"><strong>' . t('Pig Latin Title') . ':</strong> ' . check_plain($node->node_hooks_title) . '</div>',
       '#weight' => 100,
     );
     

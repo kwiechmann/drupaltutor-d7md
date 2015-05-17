@@ -1,0 +1,67 @@
+<?php
+
+// * Permissions levels for pages restrict access.
+// * Cross-site scripting with JavaScript.
+// * SQL injection.
+
+function security_demo_menu() {
+  $items = array();
+  
+  $items['insecure-node/%node'] = array(
+    'title callback' => 'security_demo_node_title',
+    'title arguments' => array(1),
+    'page callback' => 'security_demo_node_body',
+    'page arguments' => array(1),
+    'access arguments'  => array('access content'),
+  );
+  
+  return $items;
+}
+
+function security_demo_node_title($node) {
+  // No need to sanitize here as Drupal already sanitizes the title. The result
+  // if done again will cause the double escaping of HTML entities. Expect to
+  // see lots of &lt; and &gt; entities.
+  // return check_plain($node->title);
+  return $node->title;
+}
+
+function security_demo_node_body($node) {
+  // node 12 has all of the JavaScript injections included.
+  
+  // dpm($node);
+  
+  // Must sanitize the node's title value. Both check_plain() and t() work fine
+  // as long as @ or % are used. If ! title is used no sanitization occurs.
+  $title = check_plain($node->title);
+  // $title = t('Title: !title', array('!title' => $node->title));
+  $title = t('Title: %title', array('%title' => $node->title));
+  $title = t('Title: @title', array('@title' => $node->title));
+  
+  // By accessing the content directly, the content will not have been
+  // sanitized.
+  // return $node->body[LANGUAGE_NONE][0]['value'];
+  
+  // A safe value should be included within in the node.
+  // return $node->body[LANGUAGE_NONE][0]['safe_value'];
+  
+  // Any text that is added to the body need to be sanitized.
+  $body = $node->body[LANGUAGE_NONE][0]['safe_value'];
+  $revision_log = $node->log; 
+  // * check_plain() removes all HTML.
+  // * check_markup() defaults to a filter that outputs very similar to
+  // check_plain.
+  // * filter_xss which is the most lenient and just removes script tags.
+  // return $body . '<div>Revision Log: ' . $revision_log . '</div>';
+  // return $body . '<div>Revision Log: ' . check_plain($revision_log) . '</div>';
+  // return $body . '<div>Revision Log: ' . check_markup($revision_log, 'filter_html') . '</div>';
+  return $body . '<h2>' . $title . '</h2> <div>Revision Log: ' . filter_xss($revision_log) . '</div>';
+}
+
+function security_demo_node_presave($node) {
+  // db_query("INSERT INTO {security_demo} (log) VALUES ('Node saved: " . $node->title . "')");
+  
+  db_query("INSERT INTO {security_demo} (log) VALUES (:message)", 
+    array(':message' => $node->title)
+  );
+}
