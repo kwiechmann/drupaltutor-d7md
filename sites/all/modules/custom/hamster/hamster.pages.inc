@@ -186,14 +186,17 @@ function hamster_edit_form_submit($form, &$form_state) {
     // Existing hamster. Need to tell drupal_write_recorder() which the primary
     // key is.
     $result = drupal_write_record('hamster', $hamster, array('id'));
-    drupal_set_message(t('Hamster %name updated: @result', array('%name' => $hamster['name'], '@result' => $result,)));
+    drupal_set_message(t('Hamster %name updated: @result', array('%name' => $hamster['name'], '@result' => $result)));
   }
   else {
     // New hamster. As a side effect, drupal_write_record will add 'id' to the
     // input array which in this case is $hamster.
     $result = drupal_write_record('hamster', $hamster);
-    drupal_set_message(t('Hamster %name created: @result.', array('%name' => $hamster['name'], '@result' => $result,)));
+    drupal_set_message(t('Hamster %name created: @result.', array('%name' => $hamster['name'], '@result' => $result)));
   }
+  
+  // Updated content. Must tell the cache to clear.
+  cache_clear_all('perf_demo:hamsters:list', 'cache');
   
   if (!empty($hamster['image'])) {
     $file = file_load($hamster['image']);
@@ -260,6 +263,8 @@ function hamster_delete_form_submit($form, &$form_state) {
             array(':id' => $hamster_id));
   drupal_set_message(t('Hamster %name deleted.', 
                       array('%name' => $form_state['values']['name'])));
+  
+  cache_clear_all('perf_demo:hamsters:list', 'cache');
   
   $form_state['redirect'] = 'hamster';
 }

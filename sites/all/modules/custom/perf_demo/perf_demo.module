@@ -1,0 +1,93 @@
+<?php
+
+function perf_demo_menu() {
+  $items = array();
+  
+  $items['perf-demo'] = array(
+    'title' => 'Performance Demo',
+    'page callback' => 'perf_demo_page',
+    'access arguments' => array('access content'),
+  );
+  
+  return $items;
+}
+
+function perf_demo_page() {
+  $start = microtime(TRUE);
+  $count = 0;
+  
+  for ($i = 0; $i < 5; $i++) {
+    $count += count(perf_demo_load_all_hamsters());
+  }
+  
+  $end = microtime(TRUE);
+  
+  return t('Loaded @count hamsters in @time seconds.', 
+    array('@count' => $count, '@time' => $end - $start));
+}
+
+function perf_demo_load_all_hamsters() {
+  // Get the hamsters array from the cache.
+  $bin = 'cache';
+  $cid = 'perf_demo:hamsters:list';
+  $hamster_list_cache = cache_get($cid, $bin);
+  
+  // Added cache clearing when the hamster updates are submitted.
+  // cache_clear_all('perf_demo:hamsters:list', 'cache');
+  
+  if (!empty($hamster_list_cache)) {
+    // dpm($hamster_list_cache);
+    
+    // Must grab the saved cache date from the data sub property.
+    $hamsters = $hamster_list_cache->data;
+  }
+  else {
+    // Read in the hamster information and store it so that it is available
+    // for other runs.
+    $hamsters = array();
+
+    $ids = db_query('SELECT id FROM {hamster}')->fetchCol();
+    foreach ($ids as $id) {
+      $hamsters[] = perf_demo_hamster_load($id);
+    }
+    
+    // Store the data for the next run.
+    cache_set($cid, $hamsters, $bin, REQUEST_TIME + 60*60);
+  }
+ 
+  // dpm($hamsters);
+  
+  return $hamsters;
+}
+
+function perf_demo_hamster_load($id) {
+  
+  // Create a global variable for storing the data for the life of the page.
+  // Will not overwrite an existing variable. The function __FUNCTION__() is
+  // used by default to namespace properly. If more than one variable is
+  // required, concat additional naming to __FUNCTION__.
+  $hamsters = &drupal_static(__FUNCTION__);
+  
+  if (isset($hamsters[$id])) {
+    return $hamsters[$id];
+  }
+  
+  // Sleep for 100,000 microseconds = 0.1 seconds to exagerate the time.
+  usleep(100000);
+  
+  $hamsters[$id] = db_query('
+                              SELECT 
+                              h.*, 
+                              hh.name AS habitat_name
+                              FROM {hamster} AS h
+                              LEFT JOIN {hamster_habitat} AS hh
+                              ON h.habitat_id = hh.id',
+                              array(':hamster_id' => $id)
+                            )->fetchObject();
+  
+  return $hamsters[$id];
+}
+
+
+
+
