@@ -1,0 +1,6 @@
+name = Perf Demo
+core = 7.x
+
+version = 7.x-1.x
+description = Demonstration of using caching to improve performance of Drupal hooks.
+package = DrupalTutor
